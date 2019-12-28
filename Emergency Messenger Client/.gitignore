@@ -1,0 +1,6 @@
+*.iml
+*.xcworkspacedata
+*.png
+*README.md
+.idea
+.dart-tool
