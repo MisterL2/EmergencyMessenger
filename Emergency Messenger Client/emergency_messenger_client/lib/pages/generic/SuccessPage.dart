@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SuccessPage extends StatelessWidget {
-  final String title = "SuccessPage";
+  final String title = "Success";
 
   SuccessPage({Key key}) : super(key: key);
 

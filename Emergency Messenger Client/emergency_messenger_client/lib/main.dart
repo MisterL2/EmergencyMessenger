@@ -1,4 +1,5 @@
 
+import 'package:emergency_messenger_client/pages/generic/ErrorPage.dart';
 import 'package:emergency_messenger_client/pages/generic/SuccessPage.dart';
 import 'package:emergency_messenger_client/pages/private/LoggedInOverview.dart';
 import 'package:emergency_messenger_client/pages/private/OptionsMenu.dart';
@@ -22,6 +23,7 @@ class EmergencyMessenger extends StatelessWidget {
         '/Register' : (context) => RegisterPage(),
         '/AddDevice' : (context) => AddDevicePage(),
         '/Success' : (context) => SuccessPage(),
+        '/Error' : (context) => ErrorPage(),
         '/Messages' : (context) => LoggedInOverview(),
         '/Options' : (context) => OptionsMenu(),
       },

@@ -1,3 +1,4 @@
+import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
 
 class ExamplePage extends StatefulWidget {
@@ -10,9 +11,9 @@ class ExamplePage extends StatefulWidget {
 
 }
 
-class ExamplePageState extends State<ExamplePage> {
+class ExamplePageState extends PrivateState<ExamplePage> {
   @override
-  Widget build(BuildContext context) {
+  Widget buildImpl(BuildContext context, String password) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

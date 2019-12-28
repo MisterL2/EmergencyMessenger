@@ -1,4 +1,5 @@
 import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
+import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
 
 class LoggedInOverview extends StatefulWidget {
@@ -8,35 +9,37 @@ class LoggedInOverview extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() => LoggedInOverviewState();
-
-
-
 }
 
-class LoggedInOverviewState extends State<LoggedInOverview> {
+class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
   final List<ConversationHeader> conversationHeaders = [];
-
-  LoggedInOverviewState() {
-    _generateConversationHeaders();
-  }
 
   //Uses all cached messages
   void _generateConversationHeaders() {
-    var example1 = ConversationHeader("Rudolf","Der Schlitten ist fertig",true);
-    var example2 = ConversationHeader("Gustav","KFZ Rechnung von 18.03",false);
-    var example3 = ConversationHeader("Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
+    //Reset old list
+    conversationHeaders.clear();
+
+    //Read updated list from cache
+    var example1 = ConversationHeader("userCode","Rudolf","Der Schlitten ist fertig",true);
+    var example2 = ConversationHeader("userCode","Gustav","KFZ Rechnung von 18.03",false);
+    var example3 = ConversationHeader("userCode","Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
     conversationHeaders.add(example1);
     conversationHeaders.add(example2);
     conversationHeaders.add(example3);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildImpl(BuildContext context, String password) {
+
+    //TODO - Use password to decrypt/access local storage
+    _generateConversationHeaders();
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Your conversations"),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
+          IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context, password)),
         ],
       ),
       body: Center(
@@ -67,7 +70,9 @@ class LoggedInOverviewState extends State<LoggedInOverview> {
   }
 
 
-  void _redirectToOptionsMenu(BuildContext context) {
-    Navigator.of(context).pushNamed("/Options");
+  void _redirectToOptionsMenu(BuildContext context, String password) {
+    Navigator.of(context).pushNamed("/Options", arguments: <String,String>{
+      "password" : password,
+    });
   }
 }

@@ -114,8 +114,7 @@ class _LoginState extends State<LoginPage> {
       });
       return;
     }
-    if (password ==
-        "password") { //TODO - Remove this temporary if-statement and replace it based on http response
+    if (password == "password") { //TODO - Remove this temporary if-statement and replace it based on http response
       //Reset page state properly, in case user ever comes back to it
       setState(() {
         passwordFieldController.text = '';
@@ -124,7 +123,9 @@ class _LoginState extends State<LoginPage> {
       });
 
       //Now redirect to logged-in page
-      Navigator.of(context).pushNamed("/Messages");
+      Navigator.of(context).pushNamed("/Messages", arguments: <String,String>{
+        "password" : password,
+      });
     }
   }
 }

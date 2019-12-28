@@ -1,3 +1,4 @@
+import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
 
 class OptionsMenu extends StatefulWidget {
@@ -10,9 +11,10 @@ class OptionsMenu extends StatefulWidget {
 
 }
 
-class OptionsMenuState extends State<OptionsMenu> {
+class OptionsMenuState extends PrivateState<OptionsMenu> {
+
   @override
-  Widget build(BuildContext context) {
+  Widget buildImpl(BuildContext context, String password) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
