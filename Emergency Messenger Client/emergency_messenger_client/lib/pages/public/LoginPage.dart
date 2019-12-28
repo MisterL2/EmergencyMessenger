@@ -124,13 +124,7 @@ class _LoginState extends State<LoginPage> {
       });
 
       //Now redirect to logged-in page
-      Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (BuildContext context) {
-                return LoggedInOverview(title: "Your messages").createState().build(context);
-              }
-          )
-      );
+      Navigator.of(context).pushNamed("/Messages");
     }
   }
 }

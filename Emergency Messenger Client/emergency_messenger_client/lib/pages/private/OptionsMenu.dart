@@ -17,8 +17,30 @@ class OptionsMenuState extends State<OptionsMenu> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Text("Hello World"),
+      body: ListView(
+        children:
+          ListTile.divideTiles(
+              context: context,
+              tiles: [
+                ListTile(
+                  leading: Icon(Icons.build),
+                  title: Text("Add another user"),
+                  subtitle: Text(""),
+                  trailing: Icon(Icons.arrow_forward),
+                ),
+                ListTile(
+                  leading: Icon(Icons.build),
+                  title: Text("Generate connection code"),
+                  subtitle: Text(""),
+                  trailing: Icon(Icons.arrow_forward),
+                ),
+                ListTile(
+                  leading: Icon(Icons.build),
+                  title: Text("Reset usercode"),
+                  subtitle: Text("This will irreversibly end all conversations and make it impossible for other people to message you, until they add your new code again!"),
+                  trailing: Icon(Icons.arrow_forward),
+                ),
+          ]).toList(),
       ),
     );
   }
