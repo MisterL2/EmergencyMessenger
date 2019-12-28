@@ -1,4 +1,4 @@
-import 'package:emergency_messenger_client/pages/dataclasses/ConversationHeader.dart';
+import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
 import 'package:flutter/material.dart';
 
 class LoggedInOverview extends StatefulWidget {
