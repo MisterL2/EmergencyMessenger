@@ -14,12 +14,12 @@ class LoggedInOverview extends StatefulWidget {
 
   //Uses all cached messages
   void _generateConversationHeaders() {
-    var example1 = ConversationHeader("Rudolf","Der Schlitten ist fertig",true);
-    var example2 = ConversationHeader("Gustav","KFZ Rechnung von 18.03",false);
-    var example3 = ConversationHeader("Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
-    conversationHeaders.add(example1);
-    conversationHeaders.add(example2);
-    conversationHeaders.add(example3);
+//    var example1 = ConversationHeader("Rudolf","Der Schlitten ist fertig",true);
+//    var example2 = ConversationHeader("Gustav","KFZ Rechnung von 18.03",false);
+//    var example3 = ConversationHeader("Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
+//    conversationHeaders.add(example1);
+//    conversationHeaders.add(example2);
+//    conversationHeaders.add(example3);
   }
 
 }
@@ -51,14 +51,14 @@ class LoggedInOverviewState extends State<LoggedInOverview> {
 //        }
 //    );
 //  }
-
-  ListTile _buildMessage(ConversationHeader conversationHeader) {
-    return ListTile(
-      leading: Icon(Icons.account_circle),
-      title: Text(conversationHeader.name),
-      subtitle: Text(conversationHeader.mostRecentMessage),
-      trailing: conversationHeader.hasUnreadMessage ? Icon(Icons.error) : null, //Only show the icon if there are new messages
-    );
-  }
+//
+//  ListTile _buildMessage(ConversationHeader conversationHeader) {
+//    return ListTile(
+//      leading: Icon(Icons.account_circle),
+//      title: Text(conversationHeader.name),
+//      subtitle: Text(conversationHeader.mostRecentMessage),
+//      trailing: conversationHeader.hasUnreadMessage ? Icon(Icons.error) : null, //Only show the icon if there are new messages
+//    );
+//  }
 
 }
