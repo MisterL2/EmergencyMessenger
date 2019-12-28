@@ -1,7 +1,4 @@
-import 'dart:math';
 
-import 'package:emergency_messenger_client/pages/generic/SuccessPage.dart';
-import 'package:emergency_messenger_client/pages/public/FrontPage.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {

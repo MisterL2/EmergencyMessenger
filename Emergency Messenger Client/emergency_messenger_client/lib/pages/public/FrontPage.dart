@@ -1,8 +1,5 @@
-import 'package:emergency_messenger_client/pages/public/AddDevicePage.dart';
-import 'package:emergency_messenger_client/pages/public/RegisterPage.dart';
 import 'package:flutter/material.dart';
 
-import 'LoginPage.dart';
 
 class FrontPage extends StatefulWidget {
   final String title = "Emergency Messenger";

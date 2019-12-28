@@ -35,6 +35,9 @@ class LoggedInOverviewState extends State<LoggedInOverview> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Your conversations"),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
+        ],
       ),
       body: Center(
         child: _buildMessages(),
@@ -63,4 +66,8 @@ class LoggedInOverviewState extends State<LoggedInOverview> {
     );
   }
 
+
+  void _redirectToOptionsMenu(BuildContext context) {
+    Navigator.of(context).pushNamed("/Options");
+  }
 }
