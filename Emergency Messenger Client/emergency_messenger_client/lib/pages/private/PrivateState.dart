@@ -10,18 +10,16 @@ abstract class PrivateState<T extends StatefulWidget> extends State<T> {
       return denyPageAccess(context);
     }
     String password = arguments['password'];
-
     return buildImpl(context, password); //Only run when a valid password has been entered
   }
 
-  Widget denyPageAccess(BuildContext context) { //Builds an error page instead of the real page. Redirecting is NOT POSSIBLE while building a widget!
+  Widget denyPageAccess(BuildContext context, {alternateText}) { //Builds an error page instead of the real page. Redirecting is NOT POSSIBLE while building a widget!
     return Scaffold(
       appBar: AppBar(
         title: Text("Forbidden"),
       ),
       body: Center(
-        child: Text(
-          "You need to log in to view this page!",
+        child: Text(alternateText ?? "You need to log in to view this page!",
           style: TextStyle(color: Colors.red, fontSize: 40),
         ),
       ),
