@@ -15,9 +15,14 @@ class RegisterPageState extends State<RegisterPage> {
   final passwordFieldController = TextEditingController();
   bool error = false;
   String errorMessage;
+  Size size;
+  double fontSize;
 
   @override
   Widget build(BuildContext context) {
+    size = MediaQuery.of(context).size;
+    fontSize = 8 + (size.height+size.width)/200;
+    print(size);
     return Scaffold(
       appBar: AppBar(
         title: Text("Registration"),
@@ -91,7 +96,7 @@ class RegisterPageState extends State<RegisterPage> {
 
   Widget _buildInfo() {
     return Container(
-      margin: EdgeInsets.only(left: 10, bottom: 20),
+      margin: EdgeInsets.only(left: 10, bottom: size.height/30),
       alignment: Alignment.topLeft,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Padding(
@@ -99,11 +104,11 @@ class RegisterPageState extends State<RegisterPage> {
           child: RichText(
             text: TextSpan(
                 text: "1. Once you register, your account will work ",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black, fontSize: fontSize),
                 children: [
                   TextSpan(
                     text: "on this device only.",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.black, fontSize: fontSize, fontWeight: FontWeight.bold),
                   ),
                 ]),
           ),
@@ -113,11 +118,11 @@ class RegisterPageState extends State<RegisterPage> {
           child: RichText(
             text: TextSpan(
                 text: "2. If you already have an account and want to connect a new device to your account, go back and select ",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black, fontSize: fontSize),
                 children: [
                   TextSpan(
                     text: "Add new device.",
-                    style: TextStyle(color: Colors.black, fontStyle: FontStyle.italic),
+                    style: TextStyle(color: Colors.black, fontSize: fontSize, fontStyle: FontStyle.italic),
                   ),
                 ]),
           ),
@@ -127,15 +132,15 @@ class RegisterPageState extends State<RegisterPage> {
           child: RichText(
             text: TextSpan(
                 text: "3. You can have a ",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black, fontSize: fontSize,),
                 children: [
                   TextSpan(
                     text: "maximum of 5 devices ",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.black, fontSize: fontSize, fontWeight: FontWeight.bold),
                   ),
                   TextSpan(
                     text: "for an account.",
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.black, fontSize: fontSize),
                   ),
                 ]),
           ),
@@ -145,11 +150,11 @@ class RegisterPageState extends State<RegisterPage> {
           child: RichText(
             text: TextSpan(
                 text: "4. Your password grants you access on all your devices. Remember and protect it well, there is (currently) ",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black, fontSize: fontSize),
                 children: [
                   TextSpan(
                     text: "no way to reset or recover it.",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.black, fontSize: fontSize, fontWeight: FontWeight.bold),
                   ),
                 ]),
           ),
@@ -165,14 +170,15 @@ class RegisterPageState extends State<RegisterPage> {
           style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold,
-                  fontSize: 24)
+                  fontSize: 2*(fontSize-3),
+                  decoration: TextDecoration.underline)
               .apply(fontSizeFactor: 2.0)),
     );
   }
 
   Widget _buildInstructions() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
+      margin: EdgeInsets.only(left: 10, bottom: size.height/20 - 5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -181,15 +187,15 @@ class RegisterPageState extends State<RegisterPage> {
             child: RichText(
               text: TextSpan(
                 text: "1. Choose a strong password ",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black, fontSize: fontSize),
                 children: [
                   TextSpan(
                     text: "(min 8 characters)",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Colors.black, fontSize: fontSize, fontWeight: FontWeight.bold),
                   ),
                   TextSpan(
                     text: " and enter it into the box below.",
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.black, fontSize: fontSize),
                   )
                 ],
               ),
@@ -197,11 +203,17 @@ class RegisterPageState extends State<RegisterPage> {
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 3),
-            child: Text("2. Press submit"),
+            child: Text(
+              "2. Press submit",
+              style: TextStyle(fontSize: fontSize),
+            ),
           ),
           Padding(
             padding: EdgeInsets.only(bottom: 3),
-            child: Text("3. Congratulations! You are registered!"),
+            child: Text(
+                "3. Congratulations! You are registered!",
+                style: TextStyle(fontSize: fontSize),
+            ),
           ),
         ],
       ),
