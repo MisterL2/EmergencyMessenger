@@ -50,7 +50,7 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
 
   ListTile _buildMessage(ConversationHeader conversationHeader) {
     return ListTile(
-      leading: Icon(Icons.account_circle),
+      leading: Icon(Icons.account_circle), //TODO - This will be a randomly generated icon one day
       title: Text(conversationHeader.name),
       subtitle: Text(conversationHeader.mostRecentMessage),
       trailing: conversationHeader.hasUnreadMessage ? Icon(Icons.error, color: Colors.red) : null, //Only show the icon if there are new messages

@@ -1,6 +1,5 @@
-import 'dart:html';
-
 import 'package:emergency_messenger_client/dataclasses/Message.dart';
+import 'package:emergency_messenger_client/dataclasses/User.dart';
 import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +14,7 @@ class ConversationPage extends StatefulWidget {
 
 class ConversationPageState extends PrivateState<ConversationPage> {
   String _password;
+  User _user;
 
   @override
   Widget buildImpl(BuildContext context, String password) {
@@ -30,12 +30,27 @@ class ConversationPageState extends PrivateState<ConversationPage> {
       return denyPageAccess(context, alternateText: "Debug: No user found with this userCode! How did this happen?!");
     }
 
-    String localName = getLocalNameOf(userCode);
+    _user = getUserOf(userCode);
     List<Message> messages = fetchNewestMessages(userCode, 10);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localName),
+        title: Row(
+          children: <Widget>[
+            Icon(Icons.account_circle), //TODO - This will be a randomly generated icon one day
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text(_user.localAlias),
+            )
+
+          ],
+        ),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.person), onPressed: () => _changeAlias(context)), //Change the locally saved name mapped to that userCode
+          _user.isBlocked
+              ? IconButton(icon: Icon(Icons.check), onPressed: () => _unBlock(context))
+              : IconButton(icon: Icon(Icons.block), onPressed: () => _block(context)),
+        ],
       ),
       body: Center(
         child: Text(""),
@@ -55,9 +70,21 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     return [];
   }
 
-  String getLocalNameOf(String userCode) {
+  User getUserOf(String userCode) {
     //TODO - get locally saved name relating to that userCode from local cache
-    return "Heinz";
+    return User("Heinz", userCode, false);
+  }
+
+  _changeAlias(BuildContext context) {
+    print("Popup with ability to enter a new name?");
+  }
+
+  _block(BuildContext context) { //Blocks a user
+    print("Sending out an HTTP request to mark user as blocked on Server || OR || Locally adding user to a block-list"); //Not sure which one is better, but probably Local
+  }
+
+  _unBlock(BuildContext context) {
+    print("Sending out an HTTP request to mark user as UNblocked on Server || OR || Locally removing user to a block-list"); //Not sure which one is better, but probably Local
   }
 
 }

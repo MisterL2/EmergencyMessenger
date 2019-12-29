@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
 
@@ -12,9 +14,12 @@ class OptionsMenu extends StatefulWidget {
 }
 
 class OptionsMenuState extends PrivateState<OptionsMenu> {
+  String _password;
 
   @override
   Widget buildImpl(BuildContext context, String password) {
+    _password = password;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -25,26 +30,34 @@ class OptionsMenuState extends PrivateState<OptionsMenu> {
               context: context,
               tiles: [
                 ListTile(
-                  leading: Icon(Icons.build),
-                  title: Text("Add another user"),
+                  leading: Icon(Icons.person_add),
+                  title: Text("Add another user"), //This redirects to a page where a connectionCode can be generated
                   subtitle: Text(""),
                   trailing: Icon(Icons.arrow_forward),
+                  onTap: () => _redirectToAddPage(),
                 ),
                 ListTile(
-                  leading: Icon(Icons.build),
-                  title: Text("Generate connection code"),
-                  subtitle: Text(""),
-                  trailing: Icon(Icons.arrow_forward),
-                ),
-                ListTile(
-                  leading: Icon(Icons.build),
+                  leading: Icon(Icons.delete_forever),
                   title: Text("Reset usercode"),
                   subtitle: Text("This will irreversibly end all conversations and make it impossible for other people to message you, until they add your new code again!"),
                   trailing: Icon(Icons.arrow_forward),
+                  onTap: () => _redirectToResetPage(),
                 ),
           ]).toList(),
       ),
     );
+  }
+
+  _redirectToResetPage() {
+    Navigator.of(context).pushNamed("/Reset", arguments: <String,Object>{
+      "password" : _password,
+    });
+  }
+
+  _redirectToAddPage() {
+    Navigator.of(context).pushNamed("/AddUser", arguments: <String,Object>{
+      "password" : _password,
+    });
   }
 
 }
