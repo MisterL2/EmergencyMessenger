@@ -17,17 +17,17 @@ class ConversationPageState extends PrivateState<ConversationPage> {
   String _password;
 
   @override
-  Widget buildImpl(BuildContext context, String password) {
+  Widget buildImpl(BuildContext context, String password, int deviceID) {
     _password = password;
-    Map<String,String> arguments = ModalRoute.of(context).settings.arguments;
+    Map<String,Object> arguments = ModalRoute.of(context).settings.arguments;
     if(!arguments.containsKey('userCode')) {
-      return denyPageAccess(context, alternateText: "No user found with this userCode! How did this happen?!");
+      return denyPageAccess(context, alternateText: "Debug: No user found with this userCode! How did this happen?!");
     }
 
     String userCode = arguments['userCode'];
 
     if(userCode==null) {
-      return denyPageAccess(context, alternateText: "No user found with this userCode! How did this happen?!");
+      return denyPageAccess(context, alternateText: "Debug: No user found with this userCode! How did this happen?!");
     }
 
     String localName = getLocalNameOf(userCode);
@@ -38,7 +38,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
         title: Text(localName),
       ),
       body: Center(
-        child: Text("Hello World"),
+        child: Text(""),
       ),
     );
   }
