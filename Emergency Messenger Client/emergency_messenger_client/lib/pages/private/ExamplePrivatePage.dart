@@ -13,7 +13,7 @@ class ExamplePage extends StatefulWidget {
 
 class ExamplePageState extends PrivateState<ExamplePage> {
   @override
-  Widget buildImpl(BuildContext context, String password, int deviceID) {
+  Widget buildImpl(BuildContext context, String password) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

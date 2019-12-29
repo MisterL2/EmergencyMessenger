@@ -17,7 +17,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
   String _password;
 
   @override
-  Widget buildImpl(BuildContext context, String password, int deviceID) {
+  Widget buildImpl(BuildContext context, String password) {
     _password = password;
     Map<String,Object> arguments = ModalRoute.of(context).settings.arguments;
     if(!arguments.containsKey('userCode')) {

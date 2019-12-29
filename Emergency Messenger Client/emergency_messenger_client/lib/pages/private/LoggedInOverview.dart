@@ -14,13 +14,10 @@ class LoggedInOverview extends StatefulWidget {
 class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
   final List<ConversationHeader> conversationHeaders = [];
   String _password;
-  int _deviceID;
 
   @override
-  Widget buildImpl(BuildContext context, String password, int deviceID) {
+  Widget buildImpl(BuildContext context, String password) {
     _password = password;
-    _deviceID = deviceID;
-    print(deviceID);
 
     //TODO - Use password to decrypt/access local storage
     _generateConversationHeaders();
@@ -78,14 +75,12 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
   _redirectToOptionsMenu(BuildContext context) {
     Navigator.of(context).pushNamed("/Options", arguments: <String,Object>{
       "password" : _password,
-      "deviceID" : _deviceID,
     });
   }
 
   _openConversation(String userCode) {
     Navigator.of(context).pushNamed("/Conversation", arguments: <String,Object>{
       "password" : _password,
-      "deviceID" : _deviceID,
       "userCode" : userCode,
     });
   }

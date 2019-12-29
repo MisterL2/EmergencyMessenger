@@ -11,12 +11,12 @@ abstract class PrivateState<T extends StatefulWidget> extends State<T> {
     }
     String password = arguments['password'];
 
-    if(!arguments.containsKey("deviceID")) {
-      return denyPageAccess(context, alternateText: "Debug: No device ID!");
-    }
-    int deviceID = arguments['deviceID'];
+//    if(!arguments.containsKey("deviceID")) {
+//      return denyPageAccess(context, alternateText: "Debug: No device ID!");
+//    }
+//    int deviceID = arguments['deviceID'];
 
-    return buildImpl(context, password, deviceID); //Only run when a valid password has been entered
+    return buildImpl(context, password); //Only run when a valid password has been entered
   }
 
   Widget denyPageAccess(BuildContext context, {alternateText}) { //Builds an error page instead of the real page. Redirecting is NOT POSSIBLE while building a widget!
@@ -32,6 +32,6 @@ abstract class PrivateState<T extends StatefulWidget> extends State<T> {
     );
   }
 
-  Widget buildImpl(BuildContext context, String password, int deviceID);
+  Widget buildImpl(BuildContext context, String password);
   
 }
