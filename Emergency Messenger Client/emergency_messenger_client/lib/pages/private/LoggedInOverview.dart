@@ -66,13 +66,18 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
       title: Text(conversationHeader.name),
       subtitle: Text(conversationHeader.mostRecentMessage),
       trailing: conversationHeader.hasUnreadMessage ? Icon(Icons.error, color: Colors.red) : null, //Only show the icon if there are new messages
+      onTap: _openConversation(conversationHeader.userCode),
     );
   }
 
 
-  void _redirectToOptionsMenu(BuildContext context, String password) {
+  _redirectToOptionsMenu(BuildContext context, String password) {
     Navigator.of(context).pushNamed("/Options", arguments: <String,String>{
       "password" : password,
     });
+  }
+
+  _openConversation(String userCode) {
+
   }
 }
