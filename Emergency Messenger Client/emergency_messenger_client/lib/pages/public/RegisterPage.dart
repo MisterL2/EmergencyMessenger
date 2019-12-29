@@ -26,92 +26,11 @@ class RegisterPageState extends State<RegisterPage> {
       ),
       body: Column(
           children: [
-            Center(
-//              widthFactor: 0.8,
-              child:
-                Text(
-                "Important info before you register",
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 24).apply(fontSizeFactor: 2.0),
-              ),
-            ),
-//            FractionallySizedBox(
-//              widthFactor: 0.8,
-//              child:
-            Container(
-              margin: const EdgeInsets.only(left: 10, bottom: 20),
-              child: RichText(
-                strutStyle: StrutStyle(height: 1.5),
-                text: TextSpan(
-                  style: TextStyle(color: Colors.black),
-                  text: "1. Once you register, your account will work ",
-                  children: [
-                    TextSpan(
-                      text: "on this device only.\n",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: "2. If you already have an account and want to connect a new device to your account, go back and select ",
-                    ),
-                    TextSpan(
-                      text: "Add new device.\n",
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    ),
-                    TextSpan(
-                      text: "3. You can have a ",
-                    ),
-                    TextSpan(
-                      text: "maximum of 5 devices ",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(
-                      text: "for an account.\n",
-                    ),
-                    TextSpan(
-                      text: "4. Your password grants you access on all your devices. Remember and protect it well, there is (currently) ",
-                    ),
-                    TextSpan(
-                      text: "no way to reset or recover it.",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  ],
-                ),
-              ),
-            ),
-
-//            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 15),
-              child: Text(
-                    "How to register",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24).apply(fontSizeFactor: 2.0)),
-            ),
-            Container(
-              margin: const EdgeInsets.only(bottom: 15),
-              child: Text(
-                  "1. Choose a strong password (min 8 characters) and enter it into the box below.\n"
-                  "2. Press submit.\n"
-                  "3. Congratulations! You are registered!"),
-            ),
-
-            FractionallySizedBox(
-              widthFactor: 0.5,
-              child: TextField(
-                obscureText: true,
-                showCursor: false,
-                autocorrect: false,
-                enableSuggestions: false,
-                maxLength: 60,
-                maxLengthEnforced: true,
-//                autofocus: true, //Causes a crash, see github bug report
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Password',
-                  errorText: error ? errorMessage : null,
-                ),
-                controller: passwordFieldController,
-                onSubmitted: _register,
-              ),
-            ),
+            _buildTitle(),
+            _buildInfo(),
+            _buildSubTitle(),
+            _buildInstructions(),
+            _buildPasswordField(),
           ],
         ),
       );
@@ -151,5 +70,119 @@ class RegisterPageState extends State<RegisterPage> {
 
   void _successRedirect() {
     Navigator.of(context).pushNamedAndRemoveUntil("/Success", ModalRoute.withName("/"), arguments: "Successfully registered!");
+  }
+
+
+  Widget _buildTitle() {
+    return Center(
+      child: Container(
+        padding: EdgeInsets.only(left: 10, right: 10),
+        child: FittedBox(fit: BoxFit.scaleDown,
+          child: Text(
+            "Important info before you register",
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 999999999),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfo() {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Container(
+        alignment: Alignment.topLeft,
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: FittedBox(fit: BoxFit.contain,
+        alignment: Alignment.topLeft,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+            children: [
+              _buildText("1. Once you register, your account will work "),
+              _buildText("on this device only.", fontWeight: FontWeight.bold),
+            ]
+          ),
+            Row(
+                children: [
+                  _buildText("2. If you already have an account and want to connect a new device to your account, go back and select "),
+                  _buildText("Add new device.", fontStyle: FontStyle.italic),
+                ]
+            ),
+            Row(
+                children: [
+                  _buildText("3. You can have a "),
+                  _buildText("maximum of 5 devices ", fontWeight: FontWeight.bold),
+                  _buildText("for an account."),
+                ]
+            ),
+            Row(
+                children: [
+                  _buildText("4. Your password grants you access on all your devices."),
+
+                ]
+            ),
+            Row(
+              children: <Widget>[
+                _buildText("Remember and protect it well, there is (currently) "),
+                _buildText("no way to reset or recover it.", fontWeight: FontWeight.bold),
+              ],
+            )
+      ],
+        ),
+      ),
+    ),
+    );
+
+  }
+
+  Widget _buildSubTitle() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      child: Text(
+          "How to register",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24).apply(fontSizeFactor: 2.0)),
+    );
+  }
+
+  Widget _buildInstructions() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      child: Text(
+          "1. Choose a strong password (min 8 characters) and enter it into the box below.\n"
+              "2. Press submit.\n"
+              "3. Congratulations! You are registered!"),
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return FractionallySizedBox(
+      widthFactor: 0.5,
+      child: TextField(
+        obscureText: true,
+        showCursor: false,
+        autocorrect: false,
+        enableSuggestions: false,
+        maxLength: 60,
+        maxLengthEnforced: true,
+//                autofocus: true, //Causes a crash, see github bug report
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          hintText: 'Password',
+          errorText: error ? errorMessage : null,
+        ),
+        controller: passwordFieldController,
+        onSubmitted: _register,
+      ),
+    );
+  }
+
+  Text _buildText(String data, {fontWeight, fontStyle}) {
+    return Text(
+      data,
+      style: TextStyle(color: Colors.black, fontWeight: fontWeight ?? FontWeight.normal, fontStyle: fontStyle ?? FontStyle.normal, fontSize: 20),
+      textAlign: TextAlign.left,
+    );
   }
 }

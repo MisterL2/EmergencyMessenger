@@ -14,7 +14,7 @@ abstract class PrivateState<T extends StatefulWidget> extends State<T> {
     return buildImpl(context, password); //Only run when a valid password has been entered
   }
 
-  Widget denyPageAccess(BuildContext context) {
+  Widget denyPageAccess(BuildContext context) { //Builds an error page instead of the real page. Redirecting is NOT POSSIBLE while building a widget!
     return Scaffold(
       appBar: AppBar(
         title: Text("Forbidden"),
