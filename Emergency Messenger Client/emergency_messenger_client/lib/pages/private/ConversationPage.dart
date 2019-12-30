@@ -119,26 +119,13 @@ class ConversationPageState extends PrivateState<ConversationPage> {
 
   Widget _buildMessageBar() {
     RaisedButton button = _buildSendButton();
-    TextField f = TextField();
-    return Text("sefsefsef");
-//    return Expanded(
-//      child: Row(
-//        children: <Widget>[
-//          FractionallySizedBox(
-//            widthFactor: 0.8,
-//            child: TextField(
-//              showCursor: true,
-//              enableSuggestions: true,
-//              autocorrect: true,
-//              controller: _controller,
-//              onSubmitted: _sendMessage,
-//            ),
-//
-//          ),
-//          button,
-//        ],
-//      ),
-//    );
+    return TextField(
+      showCursor: true,
+      enableSuggestions: true,
+      autocorrect: true,
+      controller: _controller,
+      onSubmitted: _sendMessage,
+    );
   }
 
   Widget _buildSendButton() {

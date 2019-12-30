@@ -129,6 +129,11 @@ class _LoginState extends State<LoginPage> {
         "password" : password,
         "deviceID" : 1,
       });
+    } else { //Invalid password
+      setState(() {
+        error = true;
+        errorMessage = "Incorrect password";
+      });
     }
   }
 }
