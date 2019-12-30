@@ -43,13 +43,14 @@ class _LoginState extends State<LoginPage> {
             FractionallySizedBox(
               widthFactor: 0.5,
               child: TextField(
+                focusNode: FocusNode(),
                 obscureText: true,
                 showCursor: false,
                 autocorrect: false,
                 enableSuggestions: false,
                 maxLength: widget.maxPasswordLength,
                 maxLengthEnforced: true,
-//                autofocus: true, //Causes a crash, see github bug report
+                autofocus: true,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: 'Password',
