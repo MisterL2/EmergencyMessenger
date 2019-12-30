@@ -19,6 +19,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
   TextEditingController _controller = TextEditingController();
   ScrollController _scrollController = ScrollController();
   List<Message> _messages = [];
+  UnixTimeStringGenerator _unixTimeStringGenerator = UnixTimeStringGenerator();
 
   @override
   void initState() {
@@ -106,10 +107,10 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     //TODO - Find the *amount* most recent messages from the two lists just generated, and sort them by "most recent"
     return [
       Message("Hallo Jürgen, wie gehts?",123,false),
-      Message("Moinsen, gut!",234,true),
+      Message("Moinsen, gut!",1551809581000,true),
 //      Message("Mehrzeilige\nNachricht\nyey",456,false),
-      Message("Was gibt's?",345,true),
-      Message("Ich hab schon wieder diesen Termin vergessen...",456,false),
+      Message("Was gibt's?",1577461396000,true),
+      Message("Ich hab schon wieder diesen Termin vergessen...",1577734285000,false),
 //      Message("Extreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeem lange Nachricht                             d        Ich hab schon wieder diesen Termin vergessen...",456,false),
     ].reversed.toList();
   }
@@ -245,7 +246,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
           style: TextStyle(color: message.isOwnMessage ? Colors.green : Colors.red),
           children: <InlineSpan>[
             TextSpan(
-              text: "  " + UnixTimeStringGenerator.generateTimeStringOf(message.unixTimestamp),
+              text: "  " + _unixTimeStringGenerator.generateTimeStringOf(message.unixTimestamp),
               style: TextStyle(color: Colors.grey, fontSize: 10),
             ),
           ]
