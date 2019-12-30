@@ -1,6 +1,7 @@
 import 'package:emergency_messenger_client/dataclasses/Message.dart';
 import 'package:emergency_messenger_client/dataclasses/User.dart';
 import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
+import 'package:emergency_messenger_client/utilities/UnixTimeStringGenerator.dart';
 import 'package:flutter/material.dart';
 
 class ConversationPage extends StatefulWidget {
@@ -68,21 +69,27 @@ class ConversationPageState extends PrivateState<ConversationPage> {
               : IconButton(icon: Icon(Icons.block), onPressed: () => _block(context)),
         ],
       ),
-      body: Center(
-        child: ListView.builder(
-          controller: _scrollController,
-          reverse: true,
-          itemCount: _messages.length + 2, //1 Tile for loading icon, 1 Tile for messaging bar
-          itemBuilder: (context, index) {
-            if (index==0) return _buildMessageBar();
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          ListView.builder(
+            padding: EdgeInsets.only(top: 4, bottom: 4),
+            shrinkWrap: true,
+            controller: _scrollController,
+            itemExtent: 40,
+            reverse: true,
+            itemCount: _messages.length + 1, //1 Tile for the loading icon
+            itemBuilder: (context, index) {
 
-            //Last item = Top of list
-            if (index == _messages.length + 1) return Align(child: CircularProgressIndicator());
+              //Last item = Top of list
+              if (index == _messages.length) return Align(child: CircularProgressIndicator());
 
-            //Otherwise, print message
-            return _buildMessage(_messages[index-1]);
-          }
-        ).build(context)
+              //Otherwise, print message
+              return _buildMessage(_messages[index]);
+            }
+          ).build(context),
+          _buildMessageBar(),
+        ],
       ),
     );
   }
@@ -97,7 +104,14 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     //TODO - Fetch *amount* most recent messages for userCode from the local cache
     //TODO - Fetch *amount* most recent messages from SELF going TO userCode from the local cache
     //TODO - Find the *amount* most recent messages from the two lists just generated, and sort them by "most recent"
-    return [];
+    return [
+      Message("Hallo Jürgen, wie gehts?",123,false),
+      Message("Moinsen, gut!",234,true),
+//      Message("Mehrzeilige\nNachricht\nyey",456,false),
+      Message("Was gibt's?",345,true),
+      Message("Ich hab schon wieder diesen Termin vergessen...",456,false),
+//      Message("Extreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeem lange Nachricht                             d        Ich hab schon wieder diesen Termin vergessen...",456,false),
+    ].reversed.toList();
   }
 
   User getUserOf(String userCode) {
@@ -120,9 +134,11 @@ class ConversationPageState extends PrivateState<ConversationPage> {
   Widget _buildMessageBar() {
     print("Building message bar");
     return ListTile(
-      contentPadding: EdgeInsets.all(5),
-      title:TextField(
+      contentPadding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+      title: TextField(
         showCursor: true,
+        cursorColor: Colors.black,
+        cursorWidth: 1.5,
         enableSuggestions: true,
         autocorrect: true,
         controller: _controller,
@@ -130,27 +146,25 @@ class ConversationPageState extends PrivateState<ConversationPage> {
         decoration: InputDecoration(
           hintText: "Your Message",
           border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-          suffixIcon: Icon(Icons.attach_file),
           fillColor: Colors.white,
           filled: true,
+
+          suffixIcon: FloatingActionButton(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: Icon(Icons.attach_file),
+            onPressed: () => print("Opening 'Attach File' window!"),
+            heroTag: null,
+          ),
         ),
       ),
-      trailing: Padding(
-        padding: EdgeInsets.only(right: 10),
-        child: FloatingActionButton(
-          elevation: 0,
-          child: Icon(Icons.send),
-          onPressed: () => _sendMessage(_getFieldText()),
-        ),
-      )
-    );
-  }
-
-  Widget _buildSendButton() {
-    return RaisedButton.icon(
+      trailing: FloatingActionButton(
+        elevation: 0,
         onPressed: () => _sendMessage(_getFieldText()),
-        icon: Icon(Icons.send),
-        label: Text(""));
+        child: Icon(Icons.send),
+        heroTag: null,
+      ),
+    );
   }
 
   String _getFieldText() {
@@ -179,13 +193,20 @@ class ConversationPageState extends PrivateState<ConversationPage> {
 
   Widget _buildMessage(Message message) {
     return ListTile(
-      title: Text(
-          message.content,
+      title: RichText(
+        textAlign: message.isOwnMessage ? TextAlign.right : TextAlign.left,
+
+        text: TextSpan(
+          text: message.content,
           style: TextStyle(color: message.isOwnMessage ? Colors.green : Colors.red),
-      ),
-      trailing: Text(
-        "Today 18:00",
-        style: TextStyle(color: Colors.grey, fontSize: 6),
+          children: <InlineSpan>[
+            TextSpan(
+              text: "  " + UnixTimeStringGenerator.generateTimeStringOf(message.unixTimestamp),
+              style: TextStyle(color: Colors.grey, fontSize: 10),
+            ),
+          ]
+        ),
+
       ),
     );
   }
