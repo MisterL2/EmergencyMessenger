@@ -15,6 +15,7 @@ class ErrorPage extends StatelessWidget {
       body: Center(
         child: Text(
           errorMessage ?? "Error!",
+          textAlign: TextAlign.center,
           style: TextStyle(color: Colors.red, fontSize: 40),
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:emergency_messenger_client/pages/public/UnregisteredState.dart';
 import 'package:flutter/material.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -11,7 +12,7 @@ class RegisterPage extends StatefulWidget {
   State<StatefulWidget> createState() => RegisterPageState();
 }
 
-class RegisterPageState extends State<RegisterPage> {
+class RegisterPageState extends UnregisteredState<RegisterPage> {
   final passwordFieldController = TextEditingController();
   bool error = false;
   String errorMessage;
@@ -19,7 +20,7 @@ class RegisterPageState extends State<RegisterPage> {
   double fontSize;
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildImpl(BuildContext context) {
     size = MediaQuery.of(context).size;
     fontSize = 8 + (size.height+size.width)/200;
     print(size);

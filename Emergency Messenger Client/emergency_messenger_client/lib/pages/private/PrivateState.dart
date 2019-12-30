@@ -5,18 +5,18 @@ abstract class PrivateState<T extends StatefulWidget> extends State<T> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String,Object> arguments = ModalRoute.of(context).settings.arguments;
-    if(arguments==null || !arguments.containsKey("password") || arguments['password']==null) {
-      return denyPageAccess(context);
-    }
-    String password = arguments['password'];
+  Map<String,Object> arguments = ModalRoute.of(context).settings.arguments;
+  if(arguments==null || !arguments.containsKey("password") || arguments['password']==null) {
+  return denyPageAccess(context);
+  }
+  String password = arguments['password'];
 
 //    if(!arguments.containsKey("deviceID")) {
 //      return denyPageAccess(context, alternateText: "Debug: No device ID!");
 //    }
 //    int deviceID = arguments['deviceID'];
 
-    return buildImpl(context, password); //Only run when a valid password has been entered
+  return buildImpl(context, password); //Only run when a valid password has been entered
   }
 
   Widget denyPageAccess(BuildContext context, {alternateText}) { //Builds an error page instead of the real page. Redirecting is NOT POSSIBLE while building a widget!
@@ -25,9 +25,11 @@ abstract class PrivateState<T extends StatefulWidget> extends State<T> {
         title: Text("Forbidden"),
       ),
       body: Center(
-        child: Text(alternateText ?? "You need to log in to view this page!",
+        child: Text(
+          alternateText ?? "You need to log in to view this page!",
+          textAlign: TextAlign.center,
           style: TextStyle(color: Colors.red, fontSize: 40),
-        ),
+          ),
       ),
     );
   }

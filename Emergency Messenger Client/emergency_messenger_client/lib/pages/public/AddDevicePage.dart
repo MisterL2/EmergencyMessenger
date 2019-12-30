@@ -1,3 +1,4 @@
+import 'package:emergency_messenger_client/pages/public/UnregisteredState.dart';
 import 'package:flutter/material.dart';
 
 class AddDevicePage extends StatefulWidget {
@@ -10,9 +11,9 @@ class AddDevicePage extends StatefulWidget {
 
 }
 
-class AddDevicePageState extends State<AddDevicePage> {
+class AddDevicePageState extends UnregisteredState<AddDevicePage> {
   @override
-  Widget build(BuildContext context) {
+  Widget buildImpl(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Adding a new Device"),

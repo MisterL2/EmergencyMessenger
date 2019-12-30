@@ -15,6 +15,7 @@ class SuccessPage extends StatelessWidget {
       body: Center(
         child: Text(
           successMessage ?? "Success!",
+          textAlign: TextAlign.center,
           style: TextStyle(color: Colors.green, fontSize: 40),
         ),
       ),
