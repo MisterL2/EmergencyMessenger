@@ -15,7 +15,23 @@ class ConversationPage extends StatefulWidget {
 class ConversationPageState extends PrivateState<ConversationPage> {
   String _password;
   User _user;
+  TextEditingController _controller = TextEditingController();
+  ScrollController _scrollController = ScrollController();
+  List<Message> _messages = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() async {
+      double distanceToMaxScroll = _scrollController.position.maxScrollExtent - _scrollController.offset;
+      if(distanceToMaxScroll < 10) {
+        int messagesToGet = _messages.length + 10; //Fetches 10 additional messages (fetches all messages from local DB every time to ensure consistency (and also its easier to do in SQL))
+        _messages = fetchNewestMessages(messagesToGet);
+        setState(() {}); //Update UI to reflect this change
+      }
+    });
+  }
+  
   @override
   Widget buildImpl(BuildContext context, String password) {
     _password = password;
@@ -31,7 +47,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     }
 
     _user = getUserOf(userCode);
-    List<Message> messages = fetchNewestMessages(userCode, 10);
+    _messages = fetchNewestMessages(20);
 
     return Scaffold(
       appBar: AppBar(
@@ -53,14 +69,28 @@ class ConversationPageState extends PrivateState<ConversationPage> {
         ],
       ),
       body: Center(
-        child: Text(""),
+        child: ListView.builder(
+          controller: _scrollController,
+          reverse: true,
+          itemCount: _messages.length + 2, //1 Tile for loading icon, 1 Tile for messaging bar
+          itemBuilder: (context, index) {
+            if (index==0) return _buildMessageBar();
+
+            //Last item = Top of list
+            if (index == _messages.length + 1) return Align(child: CircularProgressIndicator());
+
+            //Otherwise, print message
+            return _buildMessage(_messages[index-1]);
+          }
+        ).build(context)
       ),
     );
   }
 
-  List<Message> fetchNewestMessages(String userCode, int amount) {
+  List<Message> fetchNewestMessages(int amount) {
     //Get `amount` messages from the local cache for this conversation
-    print(userCode);
+    String userCode = _user.userCode;
+    print("Fetching new messages!");
 
     //The below 3 TODO-s should be done in 1 SQL query
 
@@ -87,4 +117,68 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     print("Sending out an HTTP request to mark user as UNblocked on Server || OR || Locally removing user to a block-list"); //Not sure which one is better, but probably Local
   }
 
+  Widget _buildMessageBar() {
+    RaisedButton button = _buildSendButton();
+    TextField f = TextField();
+    return Text("sefsefsef");
+//    return Expanded(
+//      child: Row(
+//        children: <Widget>[
+//          FractionallySizedBox(
+//            widthFactor: 0.8,
+//            child: TextField(
+//              showCursor: true,
+//              enableSuggestions: true,
+//              autocorrect: true,
+//              controller: _controller,
+//              onSubmitted: _sendMessage,
+//            ),
+//
+//          ),
+//          button,
+//        ],
+//      ),
+//    );
+  }
+
+  Widget _buildSendButton() {
+    return RaisedButton.icon(onPressed: () => _sendMessage(_getFieldText()), icon: Icon(Icons.send), label: Text(""));
+  }
+
+  String _getFieldText() {
+    return _controller.text;
+  }
+
+  void _sendMessage(String message) {
+    int currentUnixTime = DateTime.now().millisecondsSinceEpoch;
+    setState(() {
+      _controller.text = '';
+      if(message==null || message.length==0) {
+        print("Cannot send empty message, ignore");
+        return;
+      }
+
+      _messages.insert(0,Message(message,currentUnixTime,true)); //Add to the start of the list
+
+    });
+
+    print("Sending message and unixTime to userCode!");
+    print(message);
+
+    //TODO - HTTPS transaction to send out message
+    //TODO - Save send-out message in local storage. Mark whether transmission succeeded or not! (If not, keep resending)
+  }
+
+  Widget _buildMessage(Message message) {
+    return ListTile(
+      title: Text(
+          message.content,
+          style: TextStyle(color: message.isOwnMessage ? Colors.green : Colors.red),
+      ),
+      trailing: Text(
+        "Today 18:00",
+        style: TextStyle(color: Colors.grey, fontSize: 6),
+      ),
+    );
+  }
 }

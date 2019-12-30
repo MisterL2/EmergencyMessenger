@@ -64,9 +64,9 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
     conversationHeaders.clear();
 
     //Read updated list from cache
-    var example1 = ConversationHeader("userCode","Rudolf","Der Schlitten ist fertig",true);
-    var example2 = ConversationHeader("userCode","Gustav","KFZ Rechnung von 18.03",false);
-    var example3 = ConversationHeader("userCode","Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
+    var example1 = ConversationHeader("userCode123","Rudolf","Der Schlitten ist fertig",true);
+    var example2 = ConversationHeader("userCode234","Gustav","KFZ Rechnung von 18.03",false);
+    var example3 = ConversationHeader("userCode456","Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
     conversationHeaders.add(example1);
     conversationHeaders.add(example2);
     conversationHeaders.add(example3);
