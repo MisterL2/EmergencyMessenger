@@ -118,18 +118,39 @@ class ConversationPageState extends PrivateState<ConversationPage> {
   }
 
   Widget _buildMessageBar() {
-    RaisedButton button = _buildSendButton();
-    return TextField(
-      showCursor: true,
-      enableSuggestions: true,
-      autocorrect: true,
-      controller: _controller,
-      onSubmitted: _sendMessage,
+    print("Building message bar");
+    return ListTile(
+      contentPadding: EdgeInsets.all(5),
+      title:TextField(
+        showCursor: true,
+        enableSuggestions: true,
+        autocorrect: true,
+        controller: _controller,
+        onSubmitted: _sendMessage,
+        decoration: InputDecoration(
+          hintText: "Your Message",
+          border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+          suffixIcon: Icon(Icons.attach_file),
+          fillColor: Colors.white,
+          filled: true,
+        ),
+      ),
+      trailing: Padding(
+        padding: EdgeInsets.only(right: 10),
+        child: FloatingActionButton(
+          elevation: 0,
+          child: Icon(Icons.send),
+          onPressed: () => _sendMessage(_getFieldText()),
+        ),
+      )
     );
   }
 
   Widget _buildSendButton() {
-    return RaisedButton.icon(onPressed: () => _sendMessage(_getFieldText()), icon: Icon(Icons.send), label: Text(""));
+    return RaisedButton.icon(
+        onPressed: () => _sendMessage(_getFieldText()),
+        icon: Icon(Icons.send),
+        label: Text(""));
   }
 
   String _getFieldText() {

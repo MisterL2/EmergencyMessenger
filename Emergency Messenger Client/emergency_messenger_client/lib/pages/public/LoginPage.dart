@@ -131,6 +131,7 @@ class _LoginState extends State<LoginPage> {
       });
     } else { //Invalid password
       setState(() {
+        passwordFieldController.text = '';
         error = true;
         errorMessage = "Incorrect password";
       });
