@@ -52,10 +52,11 @@ class _LoginState extends State<LoginPage> {
                 maxLengthEnforced: true,
                 autofocus: true,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
                   hintText: 'Password',
                   errorText: error ? errorMessage : null,
                 ),
+
                 controller: passwordFieldController,
                 onSubmitted: _submitPassword,
               ),

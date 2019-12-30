@@ -65,8 +65,8 @@ class ConversationPageState extends PrivateState<ConversationPage> {
         actions: <Widget>[
           IconButton(icon: Icon(Icons.person), onPressed: () => _changeAlias(context)), //Change the locally saved name mapped to that userCode
           _user.isBlocked
-              ? IconButton(icon: Icon(Icons.check), onPressed: () => _unBlock(context))
-              : IconButton(icon: Icon(Icons.block), onPressed: () => _block(context)),
+              ? IconButton(icon: Icon(Icons.check), onPressed: () => _unBlockPopup(context))
+              : IconButton(icon: Icon(Icons.block), onPressed: () => _blockPopup(context)),
         ],
       ),
       body: Column(
@@ -123,11 +123,55 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     print("Popup with ability to enter a new name?");
   }
 
-  _block(BuildContext context) { //Blocks a user
+  _blockPopup(BuildContext context) { //Blocks a user
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text("Block " + _user.localAlias + "?"),
+        content: Text("Blocking " + _user.localAlias + " will make it impossible for them to contact you!"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text("Block"),
+            onPressed: _block,
+          ),
+          FlatButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(), //Closes popup
+          ),
+        ],
+      ),
+    );
+  }
+
+  _block() {
+    Navigator.of(context).pop(); //Close popup
     print("Sending out an HTTP request to mark user as blocked on Server || OR || Locally adding user to a block-list"); //Not sure which one is better, but probably Local
   }
 
-  _unBlock(BuildContext context) {
+  _unBlockPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text("Unblock " + _user.localAlias + "?"),
+        content: Text("Unblocking " + _user.localAlias + " will allow them to contact you again!"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text("Unblock"),
+            onPressed: _unblock,
+          ),
+          FlatButton(
+            child: Text("Cancel"),
+            onPressed: () => Navigator.of(context).pop(), //Closes popup
+          ),
+        ],
+      ),
+    );
+  }
+
+  _unblock() {
+    Navigator.of(context).pop(); //Close popup
     print("Sending out an HTTP request to mark user as UNblocked on Server || OR || Locally removing user to a block-list"); //Not sure which one is better, but probably Local
   }
 
