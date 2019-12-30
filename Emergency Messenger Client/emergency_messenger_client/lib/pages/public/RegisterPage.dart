@@ -23,7 +23,7 @@ class RegisterPageState extends UnregisteredState<RegisterPage> {
   Widget buildImpl(BuildContext context) {
     size = MediaQuery.of(context).size;
     fontSize = 8 + (size.height+size.width)/200;
-    print(size);
+    
     return Scaffold(
       appBar: AppBar(
         title: Text("Registration"),

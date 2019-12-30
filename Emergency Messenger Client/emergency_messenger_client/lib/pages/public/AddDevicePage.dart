@@ -1,25 +1,25 @@
 import 'package:emergency_messenger_client/pages/public/UnregisteredState.dart';
 import 'package:flutter/material.dart';
 
-class AddDevicePage extends StatefulWidget {
+class AddThisDevicePage extends StatefulWidget {
   final String title;
 
-  AddDevicePage({Key key, this.title}) : super(key: key);
+  AddThisDevicePage({Key key, this.title}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => AddDevicePageState();
+  State<StatefulWidget> createState() => AddThisDevicePageState();
 
 }
 
-class AddDevicePageState extends UnregisteredState<AddDevicePage> {
+class AddThisDevicePageState extends UnregisteredState<AddThisDevicePage> {
   @override
   Widget buildImpl(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Adding a new Device"),
+        title: Text("Adding this device to an account"),
       ),
       body: Center(
-        child: Text("Add a new device to an already existing account"),
+        child: Text("Add this device to an already existing account"),
       ),
     );
   }

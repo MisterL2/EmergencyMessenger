@@ -37,12 +37,20 @@ class OptionsMenuState extends PrivateState<OptionsMenu> {
                   onTap: () => _redirectToAddPage(),
                 ),
                 ListTile(
+                  leading: Icon(Icons.add_to_home_screen),
+                  title: Text("Add new device"),
+                  subtitle: Text("Add another device to your account!"),
+                  trailing: Icon(Icons.arrow_forward),
+                  onTap: () => _redirectToAddNewDevicePage(),
+                ),
+                ListTile(
                   leading: Icon(Icons.delete_forever),
                   title: Text("Reset usercode"),
                   subtitle: Text("This will irreversibly end all conversations and make it impossible for other people to message you, until they add your new code again!"),
                   trailing: Icon(Icons.arrow_forward),
                   onTap: () => _redirectToResetPage(),
                 ),
+
           ]).toList(),
       ),
     );
@@ -56,6 +64,12 @@ class OptionsMenuState extends PrivateState<OptionsMenu> {
 
   _redirectToAddPage() {
     Navigator.of(context).pushNamed("/AddUser", arguments: <String,Object>{
+      "password" : _password,
+    });
+  }
+
+  _redirectToAddNewDevicePage() {
+    Navigator.of(context).pushNamed("/AddNewDevice", arguments: <String,Object>{
       "password" : _password,
     });
   }

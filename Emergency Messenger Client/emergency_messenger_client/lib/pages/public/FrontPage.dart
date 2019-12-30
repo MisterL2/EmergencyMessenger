@@ -37,7 +37,7 @@ class FrontPageState extends State<FrontPage> {
                   title: Text("Add new device"),
                   subtitle: Text("Add a new device to an already existing account"),
                   trailing: Icon(Icons.arrow_forward),
-                  onTap: () => Navigator.of(context).pushNamed("/AddDevice"),
+                  onTap: () => Navigator.of(context).pushNamed("/AddThisDevice"),
                 ),
                 ListTile(
                   leading: Icon(Icons.vpn_key),
