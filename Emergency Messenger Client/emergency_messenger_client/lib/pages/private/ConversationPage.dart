@@ -147,7 +147,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
 
   _block() {
     Navigator.of(context).pop(); //Close popup
-    print("Sending out an HTTP request to mark user as blocked on Server || OR || Locally adding user to a block-list"); //Not sure which one is better, but probably Local
+    print("Sending out an HTTP request to mark user as blocked on Server"); //Local blocking in the app does not work properly as it exhausts the quota for FCM (Firebase Cloud Messaging) messages. Also, you could DDOS users silently with spam messages if they blocked you.
   }
 
   _unBlockPopup(BuildContext context) {
@@ -173,7 +173,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
 
   _unblock() {
     Navigator.of(context).pop(); //Close popup
-    print("Sending out an HTTP request to mark user as UNblocked on Server || OR || Locally removing user to a block-list"); //Not sure which one is better, but probably Local
+    print("Sending out an HTTP request to mark user as unblocked on Server"); //Local blocking in the app does not work properly as it exhausts the quota for FCM (Firebase Cloud Messaging) messages. Also, you could DDOS users silently with spam messages if they blocked you.
   }
 
   Widget _buildMessageBar() {
@@ -197,7 +197,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
           suffixIcon: FloatingActionButton(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            child: Icon(Icons.attach_file),
+            child: Icon(Icons.attach_file, color: Colors.black,),
             onPressed: () => print("Opening 'Attach File' window!"),
             heroTag: null,
           ),

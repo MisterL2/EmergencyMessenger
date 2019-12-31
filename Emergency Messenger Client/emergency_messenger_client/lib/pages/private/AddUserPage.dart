@@ -22,37 +22,44 @@ class AddUserPageState extends PrivateState<AddUserPage> {
   TextEditingController _addUserFieldController = TextEditingController();
   int _codeValidForSeconds;
 
-  bool addUserError = false;
-  String addUserErrorMessage;
+  bool _addUserError = false;
+  String _addUserErrorMessage;
 
+  bool _shouldDisplaySnackBar = false;
+  String _snackBarMessage;
+
+  Size _size;
 
   @override
   Widget buildImpl(BuildContext context, String password) {
+    _size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: Column(
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 10),
-            child: Text(
-            "Add another user using their connection code",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 25,
-              color: Colors.black,
+          _buildHeading("Add another user using their connection code", _size.height*0.05, _size.height*0.05),
+
+          FractionallySizedBox(
+            widthFactor: 0.6,
+            alignment: Alignment.center,
+            child: Padding(
+              padding: EdgeInsets.all(5),
+              child: _buildAddUserRow(),
             ),
           ),
-        ),
-          Padding(
-            padding: EdgeInsets.all(5),
-            child: _buildAddUserRow(),
-          ),
+
+
+          _buildHeading("Generate a code for other users to add you", _size.height*0.075, _size.height*0.05),
+
+
           Padding(
             padding: EdgeInsets.all(5),
             child: _buildGenerateCodeRow(),
           ),
+
         ],
       ),
     );
@@ -60,7 +67,7 @@ class AddUserPageState extends PrivateState<AddUserPage> {
 
   String _generateNumberCodeAndInformServer() {
     _numberCode = SecureRandomiser.generateRandomString(9, alphabet: "0123456789");
-    _generatedNumberController.text = _numberCode;
+    _generatedNumberController.text = _numberCode.substring(0,3) + " " + _numberCode.substring(3,6) + " " + _numberCode.substring(6); //Only the text has the spaces for visual separation, the _numberCode variable remains a valid number
     _codeValidForSeconds = 60;
     _timerFieldController.text = _codeValidForSeconds.toString(); //Set the initial value before the timer starts
     Timer.periodic(Duration(seconds: 1), (timer) {
@@ -68,10 +75,11 @@ class AddUserPageState extends PrivateState<AddUserPage> {
       _timerFieldController.text = _codeValidForSeconds.toString();
       if(_codeValidForSeconds<=0) {
         timer.cancel();
-        _generatedNumberController.text = '';
-        _timerFieldController.text = '';
-        _numberCode = null; //Reset the generated number code (as it is now invalid). This will also enable the "Generate Code" button again
-        setState(() {}); //Update UI, so that the button actually enables again
+        setState(() {
+          _numberCode = null; //Reset the generated number code (as it is now invalid). This will also enable the "Generate Code" button again
+          _generatedNumberController.text = '';
+          _timerFieldController.text = '';
+        }); //Update UI, so that the button actually enables again
       }
     });
 
@@ -84,8 +92,8 @@ class AddUserPageState extends PrivateState<AddUserPage> {
   void _addUser() {
     if(_addUserFieldController.text.length!=9) { //UserCode of incorrect length
       setState(() {
-        addUserError = true;
-        addUserErrorMessage = "Invalid code! (Should be 9 numbers long)";
+        _addUserError = true;
+        _addUserErrorMessage = "Invalid code! (Should be 9 numbers long)";
         //Does not clear field
       }); //Update UI
       return;
@@ -94,12 +102,12 @@ class AddUserPageState extends PrivateState<AddUserPage> {
 
       //TODO - Connect to server and retrieve values for that code
 
-      bool unableToConnect = false;
+      bool unableToConnect = true;
 
       if(unableToConnect) {
         setState(() {
-          addUserError = true;
-          addUserErrorMessage = 'Unable to connect to server...';
+          _addUserError = true;
+          _addUserErrorMessage = 'Unable to connect to server...';
         });
         return;
       }
@@ -107,22 +115,20 @@ class AddUserPageState extends PrivateState<AddUserPage> {
       bool serverConfirmsCodeIsCorrect = true;
 
       if(serverConfirmsCodeIsCorrect) {
-        final SnackBar snackBar = SnackBar(
-          content: Text("User was successfully added!"),
-        );
+        _shouldDisplaySnackBar = true;
+        _snackBarMessage = "User was successfully added!";
 
         print("Successfully added user!");
-        Scaffold.of(context).showSnackBar(snackBar);
-        setState(() {
 
-          addUserError = false;
-          addUserErrorMessage = '';
+        setState(() {
+          _addUserError = false;
+          _addUserErrorMessage = '';
           _addUserFieldController.text = ''; //Reset field after successful add
         });
       } else {
         setState(() {
-          addUserError = true;
-          addUserErrorMessage = 'Invalid code! (Code expired or never existed)';
+          _addUserError = true;
+          _addUserErrorMessage = 'Invalid code! (Code expired or never existed)';
         });
       }
     }
@@ -131,31 +137,34 @@ class AddUserPageState extends PrivateState<AddUserPage> {
 
   Widget _buildAddUserRow() {
     return Row(
-      children: <Widget>[
+        children: <Widget>[
         Expanded(
-          flex: 4,
-          child: TextField(
-            decoration: InputDecoration(
-                errorText: addUserError ? addUserErrorMessage : null,
-                hintText: "Enter code",
-                fillColor: Colors.white,
-                filled: true,
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20))
-                )
-            ),
-            controller: _addUserFieldController,
-            keyboardType: TextInputType.number,
-            maxLength: 9,
-            maxLengthEnforced: true,
-            inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter.digitsOnly
-            ],
+        flex: 4,
+        child: TextField(
+          decoration: InputDecoration(
+              errorText: _addUserError ? _addUserErrorMessage : null,
+              hintText: "Enter code",
+              fillColor: Colors.white,
+              filled: true,
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20))
+              )
           ),
+          controller: _addUserFieldController,
+          keyboardType: TextInputType.number,
+          maxLength: 9,
+          maxLengthEnforced: true,
+          inputFormatters: <TextInputFormatter>[
+            WhitelistingTextInputFormatter.digitsOnly
+          ],
         ),
-        Expanded(
+      ),
+      Expanded(
+        child: Padding(
+          padding: EdgeInsets.only(left: 5, bottom: 20),
           child: FloatingActionButton(
             elevation: 0,
+            hoverElevation: 0,
             onPressed: _addUser,
             child: Text(
               "Add",
@@ -163,28 +172,34 @@ class AddUserPageState extends PrivateState<AddUserPage> {
             ),
           ),
         ),
-      ],
+      ),
+    ],
     );
   }
 
   Widget _buildGenerateCodeRow() {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Expanded(
-          flex: 2,
-            child: Padding(
-              padding: EdgeInsets.only(left: 5, right: 3),
-              child: _buildGenerateCodeButton(),
-            )
+        SizedBox(
+          width: 140,
+          height: 60,
+          child: Padding(
+            padding: EdgeInsets.only(left: 5, right: 3),
+            child: _buildGenerateCodeButton(),
+          ),
         ),
-        Expanded(
-          flex: 6,
-        child: Padding(
+
+        SizedBox(
+          width: 130,
+          child: Padding(
           padding: EdgeInsets.only(left: 5, right: 5),
           child: _buildGenerateCodeDisplayField(),
           ),
         ),
-        Expanded(
+
+        SizedBox(
+          width: 50,
           child: _buildGenerateCodeTimer(),
         ),
       ],
@@ -229,6 +244,24 @@ class AddUserPageState extends PrivateState<AddUserPage> {
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
         fillColor: Colors.red,
+      ),
+    );
+  }
+
+
+  Widget _buildHeading(String text, double paddingTop, double paddingBottom) {
+    return Align(
+      alignment: Alignment.center,
+      child: Padding(
+        padding: EdgeInsets.only(top: paddingTop, bottom: paddingBottom),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 8 + _size.width/40,
+            color: Colors.black,
+          ),
+        ),
       ),
     );
   }
