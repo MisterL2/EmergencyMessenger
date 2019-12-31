@@ -61,13 +61,6 @@ class _LoginState extends State<LoginPage> {
                 onSubmitted: _submitPassword,
               ),
             ),
-//            Container(
-//              margin: EdgeInsets.only(top: error ? 30 : 0),
-//              child: Text(
-//                error ? errorMessage : '',
-//                style: TextStyle(fontSize: 16.0, color: Colors.red),
-//              )
-//            )
           ],
         ),
       ),
