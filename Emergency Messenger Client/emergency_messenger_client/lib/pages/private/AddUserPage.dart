@@ -25,9 +25,6 @@ class AddUserPageState extends PrivateState<AddUserPage> {
   bool _addUserError = false;
   String _addUserErrorMessage;
 
-  bool _shouldDisplaySnackBar = false;
-  String _snackBarMessage;
-
   Size _size;
 
   @override
@@ -38,31 +35,34 @@ class AddUserPageState extends PrivateState<AddUserPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Column(
-        children: <Widget>[
-          _buildHeading("Add another user using their connection code", _size.height*0.05, _size.height*0.05),
+      body: Builder(
+        builder: (context) {
+          return Column(
+            children: <Widget>[
+              _buildHeading("Add another user using their connection code", _size.height*0.05, _size.height*0.05),
 
-          FractionallySizedBox(
-            widthFactor: 0.6,
-            alignment: Alignment.center,
-            child: Padding(
-              padding: EdgeInsets.all(5),
-              child: _buildAddUserRow(),
-            ),
-          ),
-
-
-          _buildHeading("Generate a code for other users to add you", _size.height*0.075, _size.height*0.05),
+              FractionallySizedBox(
+                widthFactor: 0.6,
+                child: Padding(
+                  padding: EdgeInsets.all(5),
+                  child: _buildAddUserRow(context), //Need to pass the builder-context, because that is a child of Scaffold and that is needed for the SnackBar. Otherwise it uses the default context (which contains a Scaffold, but is not a child of it) and crashes horribly :(
+                ),
+              ),
 
 
-          Padding(
-            padding: EdgeInsets.all(5),
-            child: _buildGenerateCodeRow(),
-          ),
+              _buildHeading("Generate a code for other users to add you", _size.height*0.075, _size.height*0.05),
 
-        ],
-      ),
-    );
+
+              Padding(
+                padding: EdgeInsets.all(5),
+                child: _buildGenerateCodeRow(),
+              ),
+
+            ],
+          );
+        },
+      )
+          );
   }
 
   String _generateNumberCodeAndInformServer() {
@@ -89,7 +89,7 @@ class AddUserPageState extends PrivateState<AddUserPage> {
     return _numberCode;
   }
 
-  void _addUser() {
+  void _addUser(BuildContext context) {
     if(_addUserFieldController.text.length!=9) { //UserCode of incorrect length
       setState(() {
         _addUserError = true;
@@ -98,11 +98,12 @@ class AddUserPageState extends PrivateState<AddUserPage> {
       }); //Update UI
       return;
     } else {
+
       print("Attempting to add user!");
 
       //TODO - Connect to server and retrieve values for that code
 
-      bool unableToConnect = true;
+      bool unableToConnect = false;
 
       if(unableToConnect) {
         setState(() {
@@ -115,10 +116,14 @@ class AddUserPageState extends PrivateState<AddUserPage> {
       bool serverConfirmsCodeIsCorrect = true;
 
       if(serverConfirmsCodeIsCorrect) {
-        _shouldDisplaySnackBar = true;
-        _snackBarMessage = "User was successfully added!";
 
-        print("Successfully added user!");
+        Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Text("User has been successfully added!"),
+              behavior: SnackBarBehavior.floating,
+              elevation: 2,
+              onVisible: () => print("TODO - Play a success-sound when snackbar shows!"), //TODO - Play sound when SnackBar shows ("Success" or "Ding")
+        ));
 
         setState(() {
           _addUserError = false;
@@ -135,7 +140,7 @@ class AddUserPageState extends PrivateState<AddUserPage> {
 
   }
 
-  Widget _buildAddUserRow() {
+  Widget _buildAddUserRow(BuildContext context) {
     return Row(
         children: <Widget>[
         Expanded(
@@ -165,7 +170,7 @@ class AddUserPageState extends PrivateState<AddUserPage> {
           child: FloatingActionButton(
             elevation: 0,
             hoverElevation: 0,
-            onPressed: _addUser,
+            onPressed: () => _addUser(context),
             child: Text(
               "Add",
               textAlign: TextAlign.center,
@@ -265,4 +270,6 @@ class AddUserPageState extends PrivateState<AddUserPage> {
       ),
     );
   }
+
+
 }
