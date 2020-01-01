@@ -28,6 +28,9 @@ class SQLiteHandler extends DBHandler {
             "CREATE TABLE users ("
             "localUserID INTEGER UNIQUE NOT NULL,"
             "localAlias TEXT DEFAULT 'Anonymous'," //Can be duplicated, i.e. for "Anonymous" default
+
+            //isBlocked does not do any "blocking" client-side, it only affects the UI (Whether the option is to BLOCK or UNBLOCK) and which requests are sent out to the server as a result.
+            //User blocking is managed server-side.
             "isBlocked INTEGER DEFAULT 0 CHECK(isBlocked=0 or isBlocked=1),"  //SQLite does not have a boolean type, so I am imitating it here.
             "FOREIGN KEY (localUserID) REFERENCES userCodes(localUserID)"
             ");"
@@ -80,7 +83,11 @@ class SQLiteHandler extends DBHandler {
     } else if(result.length!=1) {
       throw CustomDatabaseException("There are multiple localUserID entries for this userCode!");
     } else {
-      return result[0]["localUserID"];
+      int userID = result[0]["localUserID"];
+      if(userID<=0) { //Is this edge case possible?
+        throw CustomDatabaseException("A negative userID ($userID) was returned!");
+      }
+      return userID;
     }
   }
 
@@ -129,15 +136,41 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
-  Future<void> changeBlockStatus(String userCode, bool isNowBlocked) async {
-    // TODO: implement changeBlockStatus
-    return null;
+  Future<void> changeBlockStatus(String userCode, String localAlias, bool isNowBlocked) async {
+    //Technically localAlias is not required for the logic, but the update-command replaces an entire row, not just a field. I would have to query the localAlias first if it wasn't supplied.
+    Database db = await _database;
+
+    int localUserID = await getLocalUserIDOf(userCode);
+
+    Map<String, dynamic> rowToBeInserted = {
+      "localUserID" : localUserID,
+      "localAlias" : localAlias,
+      "isBlocked" : isNowBlocked,
+    };
+    int rowsAffectedOrErrorCode = await db.update("users", rowToBeInserted, where: "localUserID = ?", whereArgs: [localUserID]);
+    if(rowsAffectedOrErrorCode!=1) {
+      throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
+    }
   }
 
   @override
-  Future<void> changeUserAlias(String userCode, String newAlias) async {
-    // TODO: implement changeUserAlias
-    return null;
+  Future<void> changeUserAlias(String userCode, String newAlias, bool isBlocked) async {
+    //Technically isBlocked is not required for the logic, but the update-command replaces an entire row, not just a field. I would have to query the isBlocked-boolean first if it wasn't supplied.
+    Database db = await _database;
+
+    int localUserID = await getLocalUserIDOf(userCode);
+
+    Map<String, dynamic> rowToBeInserted = {
+      "localUserID" : localUserID,
+      "localAlias" : newAlias,
+      "isBlocked" : isBlocked,
+    };
+
+
+    int rowsAffectedOrErrorCode = await db.update("users", rowToBeInserted, where: "localUserID = ?", whereArgs: [localUserID]);
+    if(rowsAffectedOrErrorCode!=1) {
+      throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
+    }
   }
 
 
