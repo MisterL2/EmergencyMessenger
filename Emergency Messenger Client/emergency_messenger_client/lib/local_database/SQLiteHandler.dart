@@ -20,14 +20,14 @@ class SQLiteHandler extends DBHandler {
         onCreate: (db, version) {
           db.execute(
             "CREATE TABLE userCodes ("
-            "localUserID INTEGER PRIMARY KEY," //This apparently autoincrements by default?
+            "localUserID INTEGER PRIMARY KEY,"
             "userCode TEXT UNIQUE NOT NULL CHECK(LENGTH(userCode)=100)"
             ");"
           );
           db.execute(
             "CREATE TABLE users ("
             "localUserID INTEGER UNIQUE NOT NULL,"
-            "localAlias TEXT DEFAULT 'ANONYMOUS'," //Can be duplicated, i.e. for "Anonymous" default
+            "localAlias TEXT DEFAULT 'Anonymous'," //Can be duplicated, i.e. for "Anonymous" default
             "isBlocked INTEGER DEFAULT 0 CHECK(isBlocked=0 or isBlocked=1),"  //SQLite does not have a boolean type, so I am imitating it here.
             "FOREIGN KEY (localUserID) REFERENCES userCodes(localUserID)"
             ");"
@@ -86,14 +86,46 @@ class SQLiteHandler extends DBHandler {
 
   @override
   Future<void> addMessage(String otherUserCode, String content, bool incoming) async {
-    // TODO: implement addMessage
-    return null;
+    Database db = await _database;
+    String table = incoming ? "incomingMessages" : "outgoingMessages";
+    String fieldName = incoming ? "senderLocalUserID" : "targetLocalUserID";
+    int localUserID = await getLocalUserIDOf(otherUserCode);
+    Map<String, dynamic> message = {
+      fieldName : localUserID,
+      "content" : content,
+    };
+
+    int rowsAffectedOrErrorCode = await db.insert(table, message);
+    if(rowsAffectedOrErrorCode!=1) {
+      throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
+    }
   }
 
   @override
   Future<void> addUser(String userCode) async {
-    // TODO: implement addUser
-    return null;
+    Database db = await _database;
+    int rowCount = Sqflite.firstIntValue(await db.rawQuery("SELECT count(*) FROM userCodes;"));
+    int localUserID = rowCount + 1;
+    Map<String, dynamic> userCodesInsert = {
+      "localUserID" : localUserID,
+      "userCode" : userCode,
+    };
+    int rowsAffectedOrErrorCode = await db.insert("userCodes", userCodesInsert);
+    if(rowsAffectedOrErrorCode!=1) {
+      throw CustomDatabaseException("Something went wrong with inserting into userCodes, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
+    }
+
+    Map<String, dynamic> userTableInsert = {
+      "localUserID" : localUserID,
+      "localAlias" : "Anonymous", //Used as default
+      "isBlocked" : 0, //"False"
+    };
+
+    rowsAffectedOrErrorCode = await db.insert("users", userTableInsert);
+    if(rowsAffectedOrErrorCode!=1) {
+      throw CustomDatabaseException("Something went wrong with inserting into users, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
+    }
+
   }
 
   @override
@@ -107,7 +139,6 @@ class SQLiteHandler extends DBHandler {
     // TODO: implement changeUserAlias
     return null;
   }
-
 
 
 }
