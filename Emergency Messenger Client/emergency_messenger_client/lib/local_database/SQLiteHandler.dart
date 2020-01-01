@@ -1,43 +1,16 @@
+import 'package:emergency_messenger_client/local_database/CustomDatabaseException.dart';
 import 'package:emergency_messenger_client/local_database/DBHandler.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class SQLiteHandler extends DBHandler {
-  @override
-  addMessage(String otherUserCode, String content, bool incoming) {
-    // TODO: implement addMessage
-    return null;
-  }
+  static Future<Database> _database;
 
-  @override
-  addUser(String userCode) {
-    // TODO: implement addUser
-    return null;
-  }
-
-  @override
-  changeBlockStatus(String userCode, bool isNowBlocked) {
-    // TODO: implement changeBlockStatus
-    return null;
-  }
-
-  @override
-  changeUserAlias(String userCode, String newAlias) {
-    // TODO: implement changeUserAlias
-    return null;
-  }
-
-  @override
-  int getLocalUserIDOf(String userCode) {
-    // TODO: implement getLocalUserIDOf
-    return null;
-  }
-
-  @override
-  String getUserCodeOf(int localUserID) {
-    // TODO: implement getUserCodeOf
-    return null;
+  SQLiteHandler() {
+    if(_database==null) {
+      openDB();
+    }
   }
 
   @override
@@ -84,5 +57,57 @@ class SQLiteHandler extends DBHandler {
       version: 1,
     );
   }
+
+  @override
+  Future<String> getUserCodeOf(int localUserID) async {
+    Database db = await _database;
+    List<Map<String,String>> result = await db.query("userCodes", where: "localUserID = ?", whereArgs: [localUserID]);
+    if(result.length==0) {
+      throw CustomDatabaseException("The localUserID '$localUserID' does not exist!");
+    } else if(result.length!=1) {
+      throw CustomDatabaseException("There are multiple entries for the localUserID '$localUserID'!");
+    } else {
+      return result[0]["userCode"];
+    }
+  }
+
+  @override
+  Future<int> getLocalUserIDOf(String userCode) async {
+    Database db = await _database;
+    List<Map<String,int>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode]);
+    if(result.length==0) {
+      throw CustomDatabaseException("There is no localUserID entry for this userCode!");
+    } else if(result.length!=1) {
+      throw CustomDatabaseException("There are multiple localUserID entries for this userCode!");
+    } else {
+      return result[0]["localUserID"];
+    }
+  }
+
+  @override
+  Future<void> addMessage(String otherUserCode, String content, bool incoming) async {
+    // TODO: implement addMessage
+    return null;
+  }
+
+  @override
+  Future<void> addUser(String userCode) async {
+    // TODO: implement addUser
+    return null;
+  }
+
+  @override
+  Future<void> changeBlockStatus(String userCode, bool isNowBlocked) async {
+    // TODO: implement changeBlockStatus
+    return null;
+  }
+
+  @override
+  Future<void> changeUserAlias(String userCode, String newAlias) async {
+    // TODO: implement changeUserAlias
+    return null;
+  }
+
+
 
 }
