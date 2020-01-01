@@ -136,11 +136,9 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
-  Future<void> changeBlockStatus(String userCode, String localAlias, bool isNowBlocked) async {
+  Future<void> changeBlockStatus(int localUserID, String localAlias, bool isNowBlocked) async {
     //Technically localAlias is not required for the logic, but the update-command replaces an entire row, not just a field. I would have to query the localAlias first if it wasn't supplied.
     Database db = await _database;
-
-    int localUserID = await getLocalUserIDOf(userCode);
 
     Map<String, dynamic> rowToBeInserted = {
       "localUserID" : localUserID,
@@ -154,11 +152,9 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
-  Future<void> changeUserAlias(String userCode, String newAlias, bool isBlocked) async {
+  Future<void> changeUserAlias(int localUserID, String newAlias, bool isBlocked) async {
     //Technically isBlocked is not required for the logic, but the update-command replaces an entire row, not just a field. I would have to query the isBlocked-boolean first if it wasn't supplied.
     Database db = await _database;
-
-    int localUserID = await getLocalUserIDOf(userCode);
 
     Map<String, dynamic> rowToBeInserted = {
       "localUserID" : localUserID,

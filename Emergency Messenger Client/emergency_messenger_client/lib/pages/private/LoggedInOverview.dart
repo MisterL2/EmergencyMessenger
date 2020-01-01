@@ -54,7 +54,7 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
       title: Text(conversationHeader.name),
       subtitle: Text(conversationHeader.mostRecentMessage),
       trailing: conversationHeader.hasUnreadMessage ? Icon(Icons.error, color: Colors.red) : null, //Only show the icon if there are new messages
-      onTap: () => _openConversation(conversationHeader.userCode),
+      onTap: () => _openConversation(conversationHeader.localUserID),
     );
   }
 
@@ -64,9 +64,9 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
     conversationHeaders.clear();
 
     //Read updated list from cache
-    var example1 = ConversationHeader("userCode123","Rudolf","Der Schlitten ist fertig",true);
-    var example2 = ConversationHeader("userCode234","Gustav","KFZ Rechnung von 18.03",false);
-    var example3 = ConversationHeader("userCode456","Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
+    var example1 = ConversationHeader(1,"Rudolf","Der Schlitten ist fertig",true);
+    var example2 = ConversationHeader(2,"Gustav","KFZ Rechnung von 18.03",false);
+    var example3 = ConversationHeader(3,"Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
     conversationHeaders.add(example1);
     conversationHeaders.add(example2);
     conversationHeaders.add(example3);
@@ -78,10 +78,10 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
     });
   }
 
-  _openConversation(String userCode) {
+  _openConversation(int localUserID) {
     Navigator.of(context).pushNamed("/Conversation", arguments: <String,Object>{
       "password" : _password,
-      "userCode" : userCode,
+      "localUserID" : localUserID,
     });
   }
 }

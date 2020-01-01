@@ -38,17 +38,17 @@ class ConversationPageState extends PrivateState<ConversationPage> {
   Widget buildImpl(BuildContext context, String password) {
     _password = password;
     Map<String,Object> arguments = ModalRoute.of(context).settings.arguments;
-    if(!arguments.containsKey('userCode')) {
+    if(!arguments.containsKey('localUserID')) {
       return denyPageAccess(context, alternateText: "Debug: No user found with this userCode! How did this happen?!");
     }
 
-    String userCode = arguments['userCode'];
+    int localUserID = arguments['localUserID'];
 
-    if(userCode==null) {
+    if(localUserID==null) {
       return denyPageAccess(context, alternateText: "Debug: No user found with this userCode! How did this happen?!");
     }
 
-    _user = getUserOf(userCode);
+    _user = getLocalAliasOf(localUserID);
     _messages = fetchNewestMessages(20);
 
     return Scaffold(
@@ -97,7 +97,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
 
   List<Message> fetchNewestMessages(int amount) {
     //Get `amount` messages from the local cache for this conversation
-    String userCode = _user.userCode;
+    int localUserID = _user.localUserID;
     print("Fetching new messages!");
 
     //The below 3 TODO-s should be done in 1 SQL query
@@ -115,9 +115,9 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     ].reversed.toList();
   }
 
-  User getUserOf(String userCode) {
+  User getLocalAliasOf(int localUserID) {
     //TODO - get locally saved name relating to that userCode from local cache
-    return User("Heinz", userCode, false);
+    return User("Heinz", localUserID, false);
   }
 
   _changeAlias(BuildContext context) {
