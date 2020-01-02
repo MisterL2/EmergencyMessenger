@@ -1,3 +1,4 @@
+import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
 import 'package:emergency_messenger_client/local_database/CustomDatabaseException.dart';
 import 'package:emergency_messenger_client/local_database/DBHandler.dart';
 import 'package:path/path.dart';
@@ -7,17 +8,23 @@ import 'package:sqflite/sqlite_api.dart';
 class SQLiteHandler extends DBHandler {
   static Future<Database> _database;
 
+  static bool databaseExists() {
+    return _database != null;
+  }
+
   SQLiteHandler() {
-    if(_database==null) {
-      openDB();
+    if(!databaseExists()) {
+      openDB().then((val) => print("hi"));
     }
   }
 
   @override
-  Future<Database> openDB({String databaseName}) async {
-    return openDatabase(
+  Future<void> openDB({String databaseName}) async {
+    print("Creating a new database!");
+    _database = openDatabase(
         join(await getDatabasesPath(), 'local_database.db'),
         onCreate: (db, version) {
+          print("Creating DB tables!");
           db.execute(
             "CREATE TABLE userCodes ("
             "localUserID INTEGER PRIMARY KEY,"
@@ -39,6 +46,7 @@ class SQLiteHandler extends DBHandler {
             "CREATE TABLE incomingMessages ("
             "senderLocalUserID PRIMARY KEY,"
             "content TEXT NOT NULL,"
+            "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
             "FOREIGN KEY (senderLocalUserID) REFERENCES userCodes(localUserID)"
             ");"
           );
@@ -46,6 +54,7 @@ class SQLiteHandler extends DBHandler {
             "CREATE TABLE outgoingMessages ("
             "targetLocalUserID PRIMARY KEY,"
             "content TEXT NOT NULL,"
+            "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
             "FOREIGN KEY (targetLocalUserID) REFERENES userCodes(targetLocalUserID)"
             ");"
           );
@@ -59,6 +68,8 @@ class SQLiteHandler extends DBHandler {
       },
       version: 1,
     );
+    print("Hey!");
+    print(_database);
   }
 
   @override
@@ -92,7 +103,7 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
-  Future<void> addMessage(String otherUserCode, String content, bool incoming) async {
+  Future<void> addMessage(String otherUserCode, String content, int unixTime, bool incoming) async {
     Database db = await _database;
     String table = incoming ? "incomingMessages" : "outgoingMessages";
     String fieldName = incoming ? "senderLocalUserID" : "targetLocalUserID";
@@ -100,6 +111,7 @@ class SQLiteHandler extends DBHandler {
     Map<String, dynamic> message = {
       fieldName : localUserID,
       "content" : content,
+      "unixTime" : unixTime,
     };
 
     int rowsAffectedOrErrorCode = await db.insert(table, message);
@@ -167,6 +179,21 @@ class SQLiteHandler extends DBHandler {
     if(rowsAffectedOrErrorCode!=1) {
       throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
     }
+  }
+
+  @override
+  Future<List<ConversationHeader>> getConversationHeaders() async {
+    Database db = await _database;
+
+    //Get the newest messages
+    List<Map<String, dynamic>> result = await db.query("incomingMessages", groupBy: "localUserID", having: "unixTime = max(unixTime)"); //Get the message with the highest unixtime for each user
+
+    //Query the users table so we can map localUserID to localAlias, and determine if they are blocked
+    List<Map<String, dynamic>> users = await db.query("users");
+
+    //Combine the two into conversation headers
+
+    return null;
   }
 
 

@@ -1,4 +1,6 @@
 import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
+import 'package:emergency_messenger_client/local_database/DBHandler.dart';
+import 'package:emergency_messenger_client/local_database/SQLiteHandler.dart';
 import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
 
@@ -62,6 +64,10 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
   void _generateConversationHeaders() {
     //Reset old list
     conversationHeaders.clear();
+
+    DBHandler dbHandler = SQLiteHandler();
+    Future<List<ConversationHeader>> retrievedHeaders = dbHandler.getConversationHeaders();
+    print(retrievedHeaders);
 
     //Read updated list from cache
     var example1 = ConversationHeader(1,"Rudolf","Der Schlitten ist fertig",true);

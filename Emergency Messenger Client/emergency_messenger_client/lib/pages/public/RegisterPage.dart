@@ -1,3 +1,5 @@
+import 'package:emergency_messenger_client/local_database/DBHandler.dart';
+import 'package:emergency_messenger_client/local_database/SQLiteHandler.dart';
 import 'package:emergency_messenger_client/pages/public/UnregisteredState.dart';
 import 'package:flutter/material.dart';
 
@@ -59,13 +61,21 @@ class RegisterPageState extends UnregisteredState<RegisterPage> {
       return;
     }
 
-    //Create personal private key
+    //TODO - Create personal private key
 
-    //Make HTTP call with public key and the desired password encrypted with private key (so it can be decrypted with public key, confirming authenticity and ownership of private key)
+    //TODO - Make HTTP call with public key and the desired password encrypted with private key (so it can be decrypted with public key, confirming authenticity and ownership of private key)
 
-    //Receive user_id ? and device_id is kinda unnecessary for registration, it is always 1
+    //TODO - Receive user_id ? and device_id is kinda unnecessary for registration, it is always 1
 
-    //Set up local storage to save this data
+    //TODO - Set up local storage to save this data
+    if(SQLiteHandler.databaseExists()) {
+      print("Database already exists!");
+    } else {
+      DBHandler dbHandler = SQLiteHandler();
+      print("Database initialised!");
+    }
+
+
 
     //Display success message
     _successRedirect();
