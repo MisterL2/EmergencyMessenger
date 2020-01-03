@@ -47,6 +47,7 @@ class SQLiteHandler extends DBHandler {
             "senderLocalUserID PRIMARY KEY,"
             "content TEXT NOT NULL,"
             "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
+            "hasBeenRead INTEGER DEFAULT 0 CHECK(hasBeenRead=0 or hasBeenRead=1),"
             "FOREIGN KEY (senderLocalUserID) REFERENCES userCodes(localUserID)"
             ");"
           );
@@ -55,6 +56,7 @@ class SQLiteHandler extends DBHandler {
             "targetLocalUserID PRIMARY KEY,"
             "content TEXT NOT NULL,"
             "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
+            "hasBeenRead INTEGER DEFAULT 0 CHECK(hasBeenRead=0 or hasBeenRead=1),"
             "FOREIGN KEY (targetLocalUserID) REFERENES userCodes(targetLocalUserID)"
             ");"
           );
@@ -112,6 +114,7 @@ class SQLiteHandler extends DBHandler {
       fieldName : localUserID,
       "content" : content,
       "unixTime" : unixTime,
+      "hasBeenRead" : 0,
     };
 
     int rowsAffectedOrErrorCode = await db.insert(table, message);
@@ -189,11 +192,32 @@ class SQLiteHandler extends DBHandler {
     List<Map<String, dynamic>> result = await db.query("incomingMessages", groupBy: "localUserID", having: "unixTime = max(unixTime)"); //Get the message with the highest unixtime for each user
 
     //Query the users table so we can map localUserID to localAlias, and determine if they are blocked
-    List<Map<String, dynamic>> users = await db.query("users");
+    Map<int, String> aliasMap = await _getLocalAliasMap();
+
 
     //Combine the two into conversation headers
+    List<ConversationHeader> conversationHeaders = [];
 
-    return null;
+    for(Map<String, dynamic> map in result) {
+      int localUserID = map["localUserID"];
+      String localAlias = aliasMap[map['localUserID']];
+      String content = map["content"];
+      bool hasBeenRead = map["hasBeenRead"] == 1 ? true : false; //Converting from int to bool. Database constraints check that it is either 0 or 1
+      ConversationHeader current = ConversationHeader(localUserID, localAlias, content, hasBeenRead);
+      conversationHeaders.add(current);
+    }
+
+    return conversationHeaders;
+  }
+
+  Future<Map<int, String>> _getLocalAliasMap() async {
+    Database db = await _database;
+    List<Map<String, dynamic>> users = await db.query("users");
+    Map<int, String> result = {};
+    for(Map<String, dynamic> map in users) {
+      result[map['localUserID']] = map['localAlias'];
+    }
+    return result;
   }
 
 
