@@ -1,4 +1,5 @@
 import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
+import 'package:emergency_messenger_client/dataclasses/Message.dart';
 import 'package:sqflite/sqflite.dart';
 
 abstract class DBHandler {
@@ -10,4 +11,5 @@ abstract class DBHandler {
   Future<String> getUserCodeOf(int localUserID);
   Future<void> changeBlockStatus(int localUserID, String localAlias, bool isNowBlocked); //Technically it can be done without localAlias, but then it requires an additional sql query, due to how the update command works
   Future<List<ConversationHeader>> getConversationHeaders();
+  Future<List<Message>> fetchMessages(int localUserID, int amountOfMessages);
 }

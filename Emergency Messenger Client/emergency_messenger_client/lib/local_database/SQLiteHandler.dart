@@ -1,4 +1,5 @@
 import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
+import 'package:emergency_messenger_client/dataclasses/Message.dart';
 import 'package:emergency_messenger_client/local_database/CustomDatabaseException.dart';
 import 'package:emergency_messenger_client/local_database/DBHandler.dart';
 import 'package:path/path.dart';
@@ -218,6 +219,20 @@ class SQLiteHandler extends DBHandler {
       result[map['localUserID']] = map['localAlias'];
     }
     return result;
+  }
+
+  @override
+  Future<List<Message>> fetchMessages(int localUserID, int amountOfMessages) async {
+    Database db = await _database;
+
+    //Get the top {amountOfMessages} from both outgoing and incoming based on unixtime
+    List<Map<String, dynamic>> incoming = await db.query("incomingMessages", orderBy: "unixTime desc", limit: amountOfMessages);
+    List<Map<String, dynamic>> outgoing = await db.query("outgoingMessages", orderBy: "unixTime desc", limit: amountOfMessages);
+
+    //Get the top {amountOfMessages} from the two lists combined (which have 2*{amountOfMessages} entries)
+
+    //TODO - this
+    return null;
   }
 
 
