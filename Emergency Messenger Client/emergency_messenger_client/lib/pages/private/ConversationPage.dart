@@ -106,11 +106,11 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     //TODO - Fetch *amount* most recent messages from SELF going TO userCode from the local cache
     //TODO - Find the *amount* most recent messages from the two lists just generated, and sort them by "most recent"
     return [
-      Message("Hallo Jürgen, wie gehts?",123,false),
-      Message("Moinsen, gut!",1551809581000,true),
+      Message("Hallo Jürgen, wie gehts?",123,false,false),
+      Message("Moinsen, gut!",1551809581000,true,false),
 //      Message("Mehrzeilige\nNachricht\nyey",456,false),
-      Message("Was gibt's?",1577461396000,true),
-      Message("Ich hab schon wieder diesen Termin vergessen...",1577734285000,false),
+      Message("Was gibt's?",1577461396000,true,false),
+      Message("Ich hab schon wieder diesen Termin vergessen...",1577734285000,false, true),
 //      Message("Extreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeem lange Nachricht                             d        Ich hab schon wieder diesen Termin vergessen...",456,false),
     ].reversed.toList();
   }
@@ -225,7 +225,7 @@ class ConversationPageState extends PrivateState<ConversationPage> {
         return;
       }
 
-      _messages.insert(0,Message(message,currentUnixTime,true)); //Add to the start of the list
+      _messages.insert(0,Message(message,currentUnixTime,true,false)); //Add to the start of the list
 
     });
 

@@ -229,10 +229,22 @@ class SQLiteHandler extends DBHandler {
     List<Map<String, dynamic>> incoming = await db.query("incomingMessages", orderBy: "unixTime desc", limit: amountOfMessages);
     List<Map<String, dynamic>> outgoing = await db.query("outgoingMessages", orderBy: "unixTime desc", limit: amountOfMessages);
 
-    //Get the top {amountOfMessages} from the two lists combined (which have 2*{amountOfMessages} entries)
+    //Convert into a combined List<Message>
+    List<Message> result = [];
+    for(Map<String, dynamic> map in incoming) {
+      Message message = Message(map["content"], map["unixTime"], false, map["hasBeenRead"]); //the value "isOwnMessage" is always false for incoming messages
+      result.add(message);
+    }
+    for(Map<String, dynamic> map in outgoing) {
+      Message message = Message(map["content"], map["unixTime"], true, map["hasBeenRead"]); //the value "isOwnMessage" is always false for incoming
+      result.add(message);
+    }
 
-    //TODO - this
-    return null;
+
+
+    //Get the top {amountOfMessages} from the two lists combined (which have 2*{amountOfMessages} entries)
+    result.sort((message1, message2) => message2.unixTimestamp - message1.unixTimestamp); //Sorts descendingly
+    return result.sublist(0,amountOfMessages); //Discards the oldest half of the messages to get back to {amountOfMessages} amount, and guarantee that they are the consecutive newest messages.
   }
 
 
