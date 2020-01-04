@@ -44,24 +44,15 @@ class SQLiteHandler extends DBHandler {
             ");"
           );
           db.execute(
-            "CREATE TABLE incomingMessages ("
-            "senderLocalUserID PRIMARY KEY,"
+            "CREATE TABLE messages ("
+            "localUserID PRIMARY KEY," //Of the conversation partner
             "content TEXT NOT NULL,"
             "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
             "hasBeenRead INTEGER DEFAULT 0 CHECK(hasBeenRead=0 or hasBeenRead=1),"
+            "isOwnMessage INTEGER DEFAULT 0 CHECK(isOwnMessage=0 or isOwnMessage=1),"
             "FOREIGN KEY (senderLocalUserID) REFERENCES userCodes(localUserID)"
             ");"
           );
-          db.execute(
-            "CREATE TABLE outgoingMessages ("
-            "targetLocalUserID PRIMARY KEY,"
-            "content TEXT NOT NULL,"
-            "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
-            "hasBeenRead INTEGER DEFAULT 0 CHECK(hasBeenRead=0 or hasBeenRead=1),"
-            "FOREIGN KEY (targetLocalUserID) REFERENES userCodes(targetLocalUserID)"
-            ");"
-          );
-
           //SHARED_PREFERENCES library cannot guarantee data persists (LOL) so using an SQLite table to cache the local userID
           db.execute(
             "CREATE TABLE preferences ("
@@ -108,17 +99,16 @@ class SQLiteHandler extends DBHandler {
   @override
   Future<void> addMessage(String otherUserCode, String content, int unixTime, bool incoming) async {
     Database db = await _database;
-    String table = incoming ? "incomingMessages" : "outgoingMessages";
-    String fieldName = incoming ? "senderLocalUserID" : "targetLocalUserID";
     int localUserID = await getLocalUserIDOf(otherUserCode);
     Map<String, dynamic> message = {
-      fieldName : localUserID,
+      "localUserID" : localUserID,
       "content" : content,
       "unixTime" : unixTime,
       "hasBeenRead" : 0,
+      "isOwnMessage" : incoming ? 1 : 0, //Convert to integer, not sure if completely necessary
     };
 
-    int rowsAffectedOrErrorCode = await db.insert(table, message);
+    int rowsAffectedOrErrorCode = await db.insert("messages", message);
     if(rowsAffectedOrErrorCode!=1) {
       throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
     }
@@ -190,7 +180,7 @@ class SQLiteHandler extends DBHandler {
     Database db = await _database;
 
     //Get the newest messages
-    List<Map<String, dynamic>> result = await db.query("incomingMessages", groupBy: "localUserID", having: "unixTime = max(unixTime)"); //Get the message with the highest unixtime for each user
+    List<Map<String, dynamic>> result = await db.query("messages", groupBy: "localUserID", having: "unixTime = max(unixTime)"); //Get the message with the highest unixtime for each user
 
     //Query the users table so we can map localUserID to localAlias, and determine if they are blocked
     Map<int, String> aliasMap = await _getLocalAliasMap();
@@ -204,7 +194,8 @@ class SQLiteHandler extends DBHandler {
       String localAlias = aliasMap[map['localUserID']];
       String content = map["content"];
       bool hasBeenRead = map["hasBeenRead"] == 1 ? true : false; //Converting from int to bool. Database constraints check that it is either 0 or 1
-      ConversationHeader current = ConversationHeader(localUserID, localAlias, content, hasBeenRead);
+      bool isOwnMessage = map["isOwnMessage"] == 1 ? true : false; //Converting from int to bool. Database constraints check that it is either 0 or 1
+      ConversationHeader current = ConversationHeader(localUserID, localAlias, content, hasBeenRead, isOwnMessage);
       conversationHeaders.add(current);
     }
 
@@ -226,25 +217,18 @@ class SQLiteHandler extends DBHandler {
     Database db = await _database;
 
     //Get the top {amountOfMessages} from both outgoing and incoming based on unixtime
-    List<Map<String, dynamic>> incoming = await db.query("incomingMessages", orderBy: "unixTime desc", limit: amountOfMessages);
-    List<Map<String, dynamic>> outgoing = await db.query("outgoingMessages", orderBy: "unixTime desc", limit: amountOfMessages);
+    List<Map<String, dynamic>> messages = await db.query("messages", orderBy: "unixTime desc", limit: amountOfMessages);
 
     //Convert into a combined List<Message>
     List<Message> result = [];
-    for(Map<String, dynamic> map in incoming) {
-      Message message = Message(map["content"], map["unixTime"], false, map["hasBeenRead"]); //the value "isOwnMessage" is always false for incoming messages
+    for(Map<String, dynamic> map in messages) {
+      bool isOwnMessage = map["isOwnMessage"]==1 ? true : false;
+      bool hasBeenRead = map["hasBeenRead"]==1 ? true : false;
+      Message message = Message(map["content"], map["unixTime"], isOwnMessage, hasBeenRead); //the value "isOwnMessage" is always false for incoming messages
       result.add(message);
     }
-    for(Map<String, dynamic> map in outgoing) {
-      Message message = Message(map["content"], map["unixTime"], true, map["hasBeenRead"]); //the value "isOwnMessage" is always false for incoming
-      result.add(message);
-    }
 
-
-
-    //Get the top {amountOfMessages} from the two lists combined (which have 2*{amountOfMessages} entries)
-    result.sort((message1, message2) => message2.unixTimestamp - message1.unixTimestamp); //Sorts descendingly
-    return result.sublist(0,amountOfMessages); //Discards the oldest half of the messages to get back to {amountOfMessages} amount, and guarantee that they are the consecutive newest messages.
+    return result;
   }
 
 

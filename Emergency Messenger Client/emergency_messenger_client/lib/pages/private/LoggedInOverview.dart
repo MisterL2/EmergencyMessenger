@@ -70,9 +70,9 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
     print(retrievedHeaders);
 
     //Read updated list from cache
-    var example1 = ConversationHeader(1,"Rudolf","Der Schlitten ist fertig",true);
-    var example2 = ConversationHeader(2,"Gustav","KFZ Rechnung von 18.03",false);
-    var example3 = ConversationHeader(3,"Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false);
+    var example1 = ConversationHeader(1,"Rudolf","Der Schlitten ist fertig",true, false);
+    var example2 = ConversationHeader(2,"Gustav","KFZ Rechnung von 18.03",false, false);
+    var example3 = ConversationHeader(3,"Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false, false);
     conversationHeaders.add(example1);
     conversationHeaders.add(example2);
     conversationHeaders.add(example3);
