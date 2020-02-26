@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
 
