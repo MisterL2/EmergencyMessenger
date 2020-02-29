@@ -3,6 +3,7 @@ import 'package:emergency_messenger_client/local_database/DBHandler.dart';
 import 'package:emergency_messenger_client/local_database/SQLiteHandler.dart';
 import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 class LoggedInOverview extends StatefulWidget {
   final String title;
@@ -16,26 +17,43 @@ class LoggedInOverview extends StatefulWidget {
 class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
   final List<ConversationHeader> conversationHeaders = [];
   String _password;
+  bool loaded = false;
 
   @override
   Widget buildImpl(BuildContext context, String password) {
     _password = password;
 
-    //TODO - Use password to decrypt/access local storage
-    _generateConversationHeaders();
+    if(!loaded) {
+      //TODO - Use password to decrypt/access local storage
+      _generateConversationHeaders();
 
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Your conversations"),
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
+          ],
+        ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Your conversations"),
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
-        ],
-      ),
-      body: Center(
-        child: _buildMessages(),
-      ),
-    );
+    } else {
+
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Your conversations"),
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
+          ],
+        ),
+        body: Center(
+          child: _buildMessages(),
+        ),
+      );
+    }
+
   }
 
   Widget _buildMessages() {
@@ -62,20 +80,36 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
 
   //Uses all cached messages
   void _generateConversationHeaders() {
-    //Reset old list
-    conversationHeaders.clear();
+    
+
 
     DBHandler dbHandler = SQLiteHandler();
-    Future<List<ConversationHeader>> retrievedHeaders = dbHandler.getConversationHeaders();
-    print(retrievedHeaders);
+    print("Deleting db");
+    dbHandler.deleteDB().then((val) {
+      print("Fetching conversation headers!");
+      Future<List<ConversationHeader>> retrievedHeaders = dbHandler.getConversationHeaders();
+      retrievedHeaders.then((conversationHeaderList) {
+        print("Future completed!");
+        conversationHeaders.clear(); //Reset old list
+        for(ConversationHeader conversationHeader in conversationHeaderList) {
+          conversationHeaders.add(conversationHeader);
+        }
+        print("Setting state!");
+        setState(() {
+          loaded=true;
+        });
+
+      });
+    });
+
 
     //Read updated list from cache
-    var example1 = ConversationHeader(1,"Rudolf","Der Schlitten ist fertig",true, false);
-    var example2 = ConversationHeader(2,"Gustav","KFZ Rechnung von 18.03",false, false);
-    var example3 = ConversationHeader(3,"Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false, false);
-    conversationHeaders.add(example1);
-    conversationHeaders.add(example2);
-    conversationHeaders.add(example3);
+//    var example1 = ConversationHeader(1,"Rudolf","Der Schlitten ist fertig",true, false);
+//    var example2 = ConversationHeader(2,"Gustav","KFZ Rechnung von 18.03",false, false);
+//    var example3 = ConversationHeader(3,"Anabell","Bitte schnell melden, ich hab den Termin wieder komplett vergessen",false, false);
+//    conversationHeaders.add(example1);
+//    conversationHeaders.add(example2);
+//    conversationHeaders.add(example3);
   }
 
   _redirectToOptionsMenu(BuildContext context) {

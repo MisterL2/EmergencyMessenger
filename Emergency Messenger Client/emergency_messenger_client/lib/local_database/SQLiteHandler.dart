@@ -7,23 +7,13 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class SQLiteHandler extends DBHandler {
-  static Future<Database> _database;
-
-  static bool databaseExists() {
-    return _database != null;
-  }
-
-  SQLiteHandler() {
-    if(!databaseExists()) {
-      openDB().then((val) => print("hi"));
-    }
-  }
 
   @override
-  Future<void> openDB({String databaseName}) async {
-    print("Creating a new database!");
-    _database = openDatabase(
-        join(await getDatabasesPath(), 'local_database.db'),
+  Future<Database> openDB({String databaseName}) async {
+    String databasePath = databaseName == null ? 'local_database.db' : databaseName;
+    print("Opening database!");
+    return openDatabase(
+        join(await getDatabasesPath(), databasePath),
         onCreate: (db, version) {
           print("Creating DB tables!");
           db.execute(
@@ -38,7 +28,7 @@ class SQLiteHandler extends DBHandler {
             "localAlias TEXT DEFAULT 'Anonymous'," //Can be duplicated, i.e. for "Anonymous" default
 
             //isBlocked does not do any "blocking" client-side, it only affects the UI (Whether the option is to BLOCK or UNBLOCK) and which requests are sent out to the server as a result.
-            //User blocking is managed server-side.
+            //User blocking is managed server-side in order to avoid issues with client-side blocking, such as silent ddos.
             "isBlocked INTEGER DEFAULT 0 CHECK(isBlocked=0 or isBlocked=1),"  //SQLite does not have a boolean type, so I am imitating it here.
             "FOREIGN KEY (localUserID) REFERENCES userCodes(localUserID)"
             ");"
@@ -50,7 +40,7 @@ class SQLiteHandler extends DBHandler {
             "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
             "hasBeenRead INTEGER DEFAULT 0 CHECK(hasBeenRead=0 or hasBeenRead=1),"
             "isOwnMessage INTEGER DEFAULT 0 CHECK(isOwnMessage=0 or isOwnMessage=1),"
-            "FOREIGN KEY (senderLocalUserID) REFERENCES userCodes(localUserID)"
+            "FOREIGN KEY (localUserID) REFERENCES userCodes(localUserID)"
             ");"
           );
           //SHARED_PREFERENCES library cannot guarantee data persists (LOL) so using an SQLite table to cache the local userID
@@ -62,13 +52,11 @@ class SQLiteHandler extends DBHandler {
       },
       version: 1,
     );
-    print("Hey!");
-    print(_database);
   }
 
   @override
   Future<String> getUserCodeOf(int localUserID) async {
-    Database db = await _database;
+    Database db = await openDB();
     List<Map<String,String>> result = await db.query("userCodes", where: "localUserID = ?", whereArgs: [localUserID]);
     if(result.length==0) {
       throw CustomDatabaseException("The localUserID '$localUserID' does not exist!");
@@ -81,7 +69,7 @@ class SQLiteHandler extends DBHandler {
 
   @override
   Future<int> getLocalUserIDOf(String userCode) async {
-    Database db = await _database;
+    Database db = await openDB();
     List<Map<String,int>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode]);
     if(result.length==0) {
       throw CustomDatabaseException("There is no localUserID entry for this userCode!");
@@ -98,7 +86,7 @@ class SQLiteHandler extends DBHandler {
 
   @override
   Future<void> addMessage(String otherUserCode, String content, int unixTime, bool incoming) async {
-    Database db = await _database;
+    Database db = await openDB();
     int localUserID = await getLocalUserIDOf(otherUserCode);
     Map<String, dynamic> message = {
       "localUserID" : localUserID,
@@ -116,7 +104,7 @@ class SQLiteHandler extends DBHandler {
 
   @override
   Future<void> addUser(String userCode) async {
-    Database db = await _database;
+    Database db = await openDB();
     int rowCount = Sqflite.firstIntValue(await db.rawQuery("SELECT count(*) FROM userCodes;"));
     int localUserID = rowCount + 1;
     Map<String, dynamic> userCodesInsert = {
@@ -144,7 +132,7 @@ class SQLiteHandler extends DBHandler {
   @override
   Future<void> changeBlockStatus(int localUserID, String localAlias, bool isNowBlocked) async {
     //Technically localAlias is not required for the logic, but the update-command replaces an entire row, not just a field. I would have to query the localAlias first if it wasn't supplied.
-    Database db = await _database;
+    Database db = await openDB();
 
     Map<String, dynamic> rowToBeInserted = {
       "localUserID" : localUserID,
@@ -160,7 +148,7 @@ class SQLiteHandler extends DBHandler {
   @override
   Future<void> changeUserAlias(int localUserID, String newAlias, bool isBlocked) async {
     //Technically isBlocked is not required for the logic, but the update-command replaces an entire row, not just a field. I would have to query the isBlocked-boolean first if it wasn't supplied.
-    Database db = await _database;
+    Database db = await openDB();
 
     Map<String, dynamic> rowToBeInserted = {
       "localUserID" : localUserID,
@@ -177,14 +165,15 @@ class SQLiteHandler extends DBHandler {
 
   @override
   Future<List<ConversationHeader>> getConversationHeaders() async {
-    Database db = await _database;
+    Database db = await openDB();
+    print(db);
 
     //Get the newest messages
     List<Map<String, dynamic>> result = await db.query("messages", groupBy: "localUserID", having: "unixTime = max(unixTime)"); //Get the message with the highest unixtime for each user
 
     //Query the users table so we can map localUserID to localAlias, and determine if they are blocked
     Map<int, String> aliasMap = await _getLocalAliasMap();
-
+    print(aliasMap);
 
     //Combine the two into conversation headers
     List<ConversationHeader> conversationHeaders = [];
@@ -203,7 +192,7 @@ class SQLiteHandler extends DBHandler {
   }
 
   Future<Map<int, String>> _getLocalAliasMap() async {
-    Database db = await _database;
+    Database db = await openDB();
     List<Map<String, dynamic>> users = await db.query("users");
     Map<int, String> result = {};
     for(Map<String, dynamic> map in users) {
@@ -214,7 +203,7 @@ class SQLiteHandler extends DBHandler {
 
   @override
   Future<List<Message>> fetchMessages(int localUserID, int amountOfMessages) async {
-    Database db = await _database;
+    Database db = await openDB();
 
     //Get the top {amountOfMessages} from both outgoing and incoming based on unixtime
     List<Map<String, dynamic>> messages = await db.query("messages", orderBy: "unixTime desc", limit: amountOfMessages);
@@ -229,6 +218,11 @@ class SQLiteHandler extends DBHandler {
     }
 
     return result;
+  }
+
+  @override
+  Future<void> deleteDB({String databaseName}) async {
+    await deleteDatabase('local_database.db');
   }
 
 

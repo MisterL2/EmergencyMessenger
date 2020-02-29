@@ -68,12 +68,7 @@ class RegisterPageState extends UnregisteredState<RegisterPage> {
     //TODO - Receive user_id ? and device_id is kinda unnecessary for registration, it is always 1
 
     //TODO - Set up local storage to save this data
-    if(SQLiteHandler.databaseExists()) {
-      print("Database already exists!");
-    } else {
-      DBHandler dbHandler = SQLiteHandler();
-      print("Database initialised!");
-    }
+
 
 
 

@@ -1,6 +1,7 @@
 import 'package:emergency_messenger_client/pages/private/LoggedInOverview.dart';
 import 'package:emergency_messenger_client/utilities/SecureRandomiser.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 class LoginPage extends StatefulWidget {
   final String title = "Login";
@@ -36,7 +37,7 @@ class _LoginState extends State<LoginPage> {
                 style: Theme
                     .of(context)
                     .textTheme
-                    .display1,
+                    .headline4,
               ),
             ),
 
@@ -92,6 +93,7 @@ class _LoginState extends State<LoginPage> {
     //Encrypt the password + token, using the private key
     String toBeEncrypted = token + password;
     print(toBeEncrypted);
+
     //TODO - encrypt
 
     //Send both the token and the encrypted (password+token) combination to the backend
