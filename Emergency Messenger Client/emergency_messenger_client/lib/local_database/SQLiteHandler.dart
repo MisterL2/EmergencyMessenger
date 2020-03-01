@@ -70,7 +70,7 @@ class SQLiteHandler extends DBHandler {
   @override
   Future<int> getLocalUserIDOf(String userCode) async {
     Database db = await openDB();
-    List<Map<String,int>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode]);
+    List<Map<String,dynamic>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode]);
     if(result.length==0) {
       throw CustomDatabaseException("There is no localUserID entry for this userCode!");
     } else if(result.length!=1) {
@@ -182,9 +182,9 @@ class SQLiteHandler extends DBHandler {
       int localUserID = map["localUserID"];
       String localAlias = aliasMap[map['localUserID']];
       String content = map["content"];
-      bool hasBeenRead = map["hasBeenRead"] == 1 ? true : false; //Converting from int to bool. Database constraints check that it is either 0 or 1
+      bool hasUnreadMessages = map["hasBeenRead"] == 1 ? false : true; //Converting from int to bool and inverting (hasBeenRead to hasUnreadMessages). Database constraints check that it is either 0 or 1
       bool isOwnMessage = map["isOwnMessage"] == 1 ? true : false; //Converting from int to bool. Database constraints check that it is either 0 or 1
-      ConversationHeader current = ConversationHeader(localUserID, localAlias, content, hasBeenRead, isOwnMessage);
+      ConversationHeader current = ConversationHeader(localUserID, localAlias, content, hasUnreadMessages, isOwnMessage);
       conversationHeaders.add(current);
     }
 

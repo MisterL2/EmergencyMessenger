@@ -86,20 +86,27 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
     DBHandler dbHandler = SQLiteHandler();
     print("Deleting db");
     dbHandler.deleteDB().then((val) {
-      print("Fetching conversation headers!");
-      Future<List<ConversationHeader>> retrievedHeaders = dbHandler.getConversationHeaders();
-      retrievedHeaders.then((conversationHeaderList) {
-        print("Future completed!");
-        conversationHeaders.clear(); //Reset old list
-        for(ConversationHeader conversationHeader in conversationHeaderList) {
-          conversationHeaders.add(conversationHeader);
-        }
-        print("Setting state!");
-        setState(() {
-          loaded=true;
-        });
+      //Test data
+      
+      dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890").then((val) {
+        dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", "TestData message", 1583070543, true).then((val) {
+          print("Fetching conversation headers!");
+          Future<List<ConversationHeader>> retrievedHeaders = dbHandler.getConversationHeaders();
+          retrievedHeaders.then((conversationHeaderList) {
+            print("Future completed!");
+            conversationHeaders.clear(); //Reset old list
+            for(ConversationHeader conversationHeader in conversationHeaderList) {
+              conversationHeaders.add(conversationHeader);
+            }
+            print("Setting state!");
+            setState(() {
+              loaded=true;
+            });
 
+          });
+        });
       });
+
     });
 
 
