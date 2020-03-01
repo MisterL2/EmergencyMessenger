@@ -1,6 +1,7 @@
 import 'package:emergency_messenger_client/dataclasses/Message.dart';
 import 'package:emergency_messenger_client/dataclasses/User.dart';
-import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
+import 'package:emergency_messenger_client/local_database/DBHandler.dart';
+import 'package:emergency_messenger_client/pages/private/DynamicPrivateState.dart';
 import 'package:emergency_messenger_client/utilities/UnixTimeStringGenerator.dart';
 import 'package:flutter/material.dart';
 
@@ -13,8 +14,8 @@ class ConversationPage extends StatefulWidget {
 
 }
 
-class ConversationPageState extends PrivateState<ConversationPage> {
-  String _password;
+class ConversationPageState extends DynamicPrivateState<ConversationPage> {
+  int _conversationPartnerID;
   User _user;
   TextEditingController _controller = TextEditingController();
   ScrollController _scrollController = ScrollController();
@@ -28,29 +29,15 @@ class ConversationPageState extends PrivateState<ConversationPage> {
       double distanceToMaxScroll = _scrollController.position.maxScrollExtent - _scrollController.offset;
       if(distanceToMaxScroll < 10) {
         int messagesToGet = _messages.length + 10; //Fetches 10 additional messages (fetches all messages from local DB every time to ensure consistency (and also its easier to do in SQL))
-        _messages = fetchNewestMessages(messagesToGet);
+        //TODO - Determine when the top is reached and there are no further messages to load!
+        _messages = await fetchNewestMessages(messagesToGet);
         setState(() {}); //Update UI to reflect this change
       }
     });
   }
   
   @override
-  Widget buildImpl(BuildContext context, String password) {
-    _password = password;
-    Map<String,Object> arguments = ModalRoute.of(context).settings.arguments;
-    if(!arguments.containsKey('localUserID')) {
-      return denyPageAccess(context, alternateText: "Debug: No user found with this userCode! How did this happen?!");
-    }
-
-    int localUserID = arguments['localUserID'];
-
-    if(localUserID==null) {
-      return denyPageAccess(context, alternateText: "Debug: No user found with this userCode! How did this happen?!");
-    }
-
-    _user = getLocalAliasOf(localUserID);
-    _messages = fetchNewestMessages(20);
-
+  Widget buildImpl(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -95,30 +82,25 @@ class ConversationPageState extends PrivateState<ConversationPage> {
     );
   }
 
-  List<Message> fetchNewestMessages(int amount) {
+  Future<List<Message>> fetchNewestMessages(int amount) async {
     //Get `amount` messages from the local cache for this conversation
-    int localUserID = _user.localUserID;
-    print("Fetching new messages!");
+    DBHandler dbHandler = DBHandler.getDBHandler();
+    _user = await dbHandler.getUser(_conversationPartnerID);
 
-    //The below 3 TODO-s should be done in 1 SQL query
+    //Fetches the *amount* most recent messages for the given localUserID from the local cache
+    return dbHandler.fetchMessages(_conversationPartnerID, amount);
 
-    //TODO - Fetch *amount* most recent messages for userCode from the local cache
-    //TODO - Fetch *amount* most recent messages from SELF going TO userCode from the local cache
-    //TODO - Find the *amount* most recent messages from the two lists just generated, and sort them by "most recent"
-    return [
-      Message("Hallo Jürgen, wie gehts?",123,false,false),
-      Message("Moinsen, gut!",1551809581000,true,false),
-//      Message("Mehrzeilige\nNachricht\nyey",456,false),
-      Message("Was gibt's?",1577461396000,true,false),
-      Message("Ich hab schon wieder diesen Termin vergessen...",1577734285000,false, true),
-//      Message("Extreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeem lange Nachricht                             d        Ich hab schon wieder diesen Termin vergessen...",456,false),
-    ].reversed.toList();
+//    return [
+//      Message("Hallo Jürgen, wie gehts?",123,false,false),
+//      Message("Moinsen, gut!",1551809581000,true,false),
+////      Message("Mehrzeilige\nNachricht\nyey",456,false),
+//      Message("Was gibt's?",1577461396000,true,false),
+//      Message("Ich hab schon wieder diesen Termin vergessen...",1577734285000,false, true),
+////      Message("Extreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeem lange Nachricht                             d        Ich hab schon wieder diesen Termin vergessen...",456,false),
+//    ].reversed.toList();
   }
 
-  User getLocalAliasOf(int localUserID) {
-    //TODO - get locally saved name relating to that userCode from local cache
-    return User("Heinz", localUserID, false);
-  }
+
 
   _changeAlias(BuildContext context) {
     print("Popup with ability to enter a new name?");
@@ -177,7 +159,6 @@ class ConversationPageState extends PrivateState<ConversationPage> {
   }
 
   Widget _buildMessageBar() {
-    print("Building message bar");
     return ListTile(
       contentPadding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
       title: TextField(
@@ -254,5 +235,37 @@ class ConversationPageState extends PrivateState<ConversationPage> {
 
       ),
     );
+  }
+
+  @override
+  Widget displayLoadingPage() {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Loading your conversation..."),
+      ),
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  @override
+  Future<void> loadDynamicContent() async {
+    _messages = await fetchNewestMessages(20);
+  }
+
+  @override
+  bool preValidate(BuildContext context) {
+    Map<String,Object> arguments = ModalRoute.of(context).settings.arguments;
+    if(!arguments.containsKey('localUserID')) {
+      return false;
+    }
+
+    int conversationPartnerID = arguments['localUserID'];
+    if(conversationPartnerID==null) {
+      return false;
+    }
+    _conversationPartnerID = conversationPartnerID;
+    return true;
   }
 }

@@ -1,9 +1,7 @@
 import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
 import 'package:emergency_messenger_client/local_database/DBHandler.dart';
-import 'package:emergency_messenger_client/local_database/SQLiteHandler.dart';
-import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
+import 'package:emergency_messenger_client/pages/private/DynamicPrivateState.dart';
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
 
 class LoggedInOverview extends StatefulWidget {
   final String title;
@@ -14,45 +12,25 @@ class LoggedInOverview extends StatefulWidget {
   State<StatefulWidget> createState() => LoggedInOverviewState();
 }
 
-class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
+class LoggedInOverviewState extends DynamicPrivateState<LoggedInOverview> {
   final List<ConversationHeader> conversationHeaders = [];
-  String _password;
   bool loaded = false;
 
   @override
-  Widget buildImpl(BuildContext context, String password) {
-    _password = password;
+  Widget buildImpl(BuildContext context) {
 
-    if(!loaded) {
-      //TODO - Use password to decrypt/access local storage
-      _generateConversationHeaders();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Your conversations"),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
+        ],
+      ),
+      body: Center(
+        child: _buildMessages(),
+      ),
+    );
 
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("Your conversations"),
-          actions: <Widget>[
-            IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
-          ],
-        ),
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
-    } else {
-
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("Your conversations"),
-          actions: <Widget>[
-            IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
-          ],
-        ),
-        body: Center(
-          child: _buildMessages(),
-        ),
-      );
-    }
 
   }
 
@@ -78,36 +56,82 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
     );
   }
 
-  //Uses all cached messages
-  void _generateConversationHeaders() {
-    
 
-
-    DBHandler dbHandler = SQLiteHandler();
-    print("Deleting db");
-    dbHandler.deleteDB().then((val) {
-      //Test data
-      
-      dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890").then((val) {
-        dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", "TestData message", 1583070543, true).then((val) {
-          print("Fetching conversation headers!");
-          Future<List<ConversationHeader>> retrievedHeaders = dbHandler.getConversationHeaders();
-          retrievedHeaders.then((conversationHeaderList) {
-            print("Future completed!");
-            conversationHeaders.clear(); //Reset old list
-            for(ConversationHeader conversationHeader in conversationHeaderList) {
-              conversationHeaders.add(conversationHeader);
-            }
-            print("Setting state!");
-            setState(() {
-              loaded=true;
-            });
-
-          });
-        });
-      });
-
+  _redirectToOptionsMenu(BuildContext context) {
+    Navigator.of(context).pushNamed("/Options", arguments: <String,Object>{
+      "password" : password,
     });
+  }
+
+  _openConversation(int localUserID) {
+    Navigator.of(context).pushNamed("/Conversation", arguments: <String,Object>{
+      "password" : password,
+      "localUserID" : localUserID,
+    });
+  }
+
+  @override
+  Widget displayLoadingPage() {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Your conversations"),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.list), onPressed: () => _redirectToOptionsMenu(context)),
+        ],
+      ),
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  @override
+  Future<void> loadDynamicContent() async {
+    DBHandler dbHandler = DBHandler.getDBHandler();
+    print("Deleting db");
+    await dbHandler.deleteDB();
+
+
+    //Test data
+    print("Adding test data!");
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", "TestData message 1", 1583070543, true);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567891");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567891", "TestData message 2", 1583070543, true);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567892");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567892", "TestData message 3", 1583070543, true);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567893");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567893", "Outgoing message 4", 1583070543, false);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567894");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567894", "TestData message 5", 1583070543, true);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567895");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567895", "TestData message 6", 1583070543, true);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567896");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567896", "TestData message 7", 1583070543, false);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567897");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567897", "TestData message 8", 1583070543, true);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567898");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567898", "TestData message 9", 1583070543, false);
+
+    await dbHandler.addUser("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567899");
+    await dbHandler.addMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567899", "TestData message 10", 1583070543, true);
+    //End of Test data
+
+    List<ConversationHeader> retrievedHeaders = await dbHandler.getConversationHeaders();
+    conversationHeaders.clear(); //Reset old list
+    for(ConversationHeader conversationHeader in retrievedHeaders) {
+      conversationHeaders.add(conversationHeader);
+    }
+
+
 
 
     //Read updated list from cache
@@ -119,16 +143,8 @@ class LoggedInOverviewState extends PrivateState<LoggedInOverview> {
 //    conversationHeaders.add(example3);
   }
 
-  _redirectToOptionsMenu(BuildContext context) {
-    Navigator.of(context).pushNamed("/Options", arguments: <String,Object>{
-      "password" : _password,
-    });
-  }
-
-  _openConversation(int localUserID) {
-    Navigator.of(context).pushNamed("/Conversation", arguments: <String,Object>{
-      "password" : _password,
-      "localUserID" : localUserID,
-    });
+  @override
+  bool preValidate(BuildContext context) {
+    return true;
   }
 }

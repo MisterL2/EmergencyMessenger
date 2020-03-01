@@ -28,7 +28,7 @@ class AddUserPageState extends PrivateState<AddUserPage> {
   Size _size;
 
   @override
-  Widget buildImpl(BuildContext context, String password) {
+  Widget buildImpl(BuildContext context) {
     _size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -269,6 +269,11 @@ class AddUserPageState extends PrivateState<AddUserPage> {
         ),
       ),
     );
+  }
+
+  @override
+  bool preValidate(BuildContext context) {
+    return true;
   }
 
 

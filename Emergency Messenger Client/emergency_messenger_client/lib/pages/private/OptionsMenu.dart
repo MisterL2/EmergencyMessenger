@@ -12,11 +12,9 @@ class OptionsMenu extends StatefulWidget {
 }
 
 class OptionsMenuState extends PrivateState<OptionsMenu> {
-  String _password;
 
   @override
-  Widget buildImpl(BuildContext context, String password) {
-    _password = password;
+  Widget buildImpl(BuildContext context) {
 
     return Scaffold(
       appBar: AppBar(
@@ -56,20 +54,25 @@ class OptionsMenuState extends PrivateState<OptionsMenu> {
 
   _redirectToResetPage() {
     Navigator.of(context).pushNamed("/Reset", arguments: <String,Object>{
-      "password" : _password,
+      "password" : password,
     });
   }
 
   _redirectToAddPage() {
     Navigator.of(context).pushNamed("/AddUser", arguments: <String,Object>{
-      "password" : _password,
+      "password" : password,
     });
   }
 
   _redirectToAddNewDevicePage() {
     Navigator.of(context).pushNamed("/AddNewDevice", arguments: <String,Object>{
-      "password" : _password,
+      "password" : password,
     });
+  }
+
+  @override
+  bool preValidate(BuildContext context) {
+    return true;
   }
 
 }

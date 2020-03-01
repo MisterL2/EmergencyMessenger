@@ -13,7 +13,7 @@ class AddNewDevicePage extends StatefulWidget {
 
 class AddNewDevicePageState extends PrivateState<AddNewDevicePage> {
   @override
-  Widget buildImpl(BuildContext context, String password) {
+  Widget buildImpl(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -22,6 +22,11 @@ class AddNewDevicePageState extends PrivateState<AddNewDevicePage> {
         child: Text("Add a new device to this account"),
       ),
     );
+  }
+
+  @override
+  bool preValidate(BuildContext context) {
+    return true;
   }
 
 }

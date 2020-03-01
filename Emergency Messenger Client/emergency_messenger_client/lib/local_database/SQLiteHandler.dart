@@ -1,5 +1,6 @@
 import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
 import 'package:emergency_messenger_client/dataclasses/Message.dart';
+import 'package:emergency_messenger_client/dataclasses/User.dart';
 import 'package:emergency_messenger_client/local_database/CustomDatabaseException.dart';
 import 'package:emergency_messenger_client/local_database/DBHandler.dart';
 import 'package:path/path.dart';
@@ -7,11 +8,9 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class SQLiteHandler extends DBHandler {
-
   @override
   Future<Database> openDB({String databaseName}) async {
     String databasePath = databaseName == null ? 'local_database.db' : databaseName;
-    print("Opening database!");
     return openDatabase(
         join(await getDatabasesPath(), databasePath),
         onCreate: (db, version) {
@@ -55,6 +54,22 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
+  Future<User> getUser(int localUserID) async {
+    Database db = await openDB();
+    List<Map<String,dynamic>> result = await db.query("users", where: "localUserID = ?", whereArgs: [localUserID]);
+    if(result.length==0) {
+      throw CustomDatabaseException("The localUserID '$localUserID' does not exist!");
+    } else if(result.length!=1) {
+      throw CustomDatabaseException("There are multiple entries for the localUserID '$localUserID'!");
+    } else {
+      Map<String, dynamic> map = result[0];
+      String localAlias = map["localAlias"];
+      bool isBlocked = map["isBlocked"] == 1 ? true : false;
+      return User(localAlias, localUserID, isBlocked);
+    }
+  }
+
+  @override
   Future<String> getUserCodeOf(int localUserID) async {
     Database db = await openDB();
     List<Map<String,String>> result = await db.query("userCodes", where: "localUserID = ?", whereArgs: [localUserID]);
@@ -70,7 +85,8 @@ class SQLiteHandler extends DBHandler {
   @override
   Future<int> getLocalUserIDOf(String userCode) async {
     Database db = await openDB();
-    List<Map<String,dynamic>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode]);
+    List<Map<String, dynamic>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode]);
+
     if(result.length==0) {
       throw CustomDatabaseException("There is no localUserID entry for this userCode!");
     } else if(result.length!=1) {
@@ -86,20 +102,18 @@ class SQLiteHandler extends DBHandler {
 
   @override
   Future<void> addMessage(String otherUserCode, String content, int unixTime, bool incoming) async {
-    Database db = await openDB();
     int localUserID = await getLocalUserIDOf(otherUserCode);
     Map<String, dynamic> message = {
       "localUserID" : localUserID,
       "content" : content,
       "unixTime" : unixTime,
-      "hasBeenRead" : 0,
+      "hasBeenRead" : incoming ? 0 : 1, //If it is an incoming message, it has not been read yet. If it was sent by the user, it naturally has been read already.
       "isOwnMessage" : incoming ? 1 : 0, //Convert to integer, not sure if completely necessary
     };
 
-    int rowsAffectedOrErrorCode = await db.insert("messages", message);
-    if(rowsAffectedOrErrorCode!=1) {
-      throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
-    }
+    Database db = await openDB();
+    int indexInsertedAt = await db.insert("messages", message);
+
   }
 
   @override
@@ -111,10 +125,7 @@ class SQLiteHandler extends DBHandler {
       "localUserID" : localUserID,
       "userCode" : userCode,
     };
-    int rowsAffectedOrErrorCode = await db.insert("userCodes", userCodesInsert);
-    if(rowsAffectedOrErrorCode!=1) {
-      throw CustomDatabaseException("Something went wrong with inserting into userCodes, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
-    }
+    int indexInsertedAt = await db.insert("userCodes", userCodesInsert);
 
     Map<String, dynamic> userTableInsert = {
       "localUserID" : localUserID,
@@ -122,11 +133,7 @@ class SQLiteHandler extends DBHandler {
       "isBlocked" : 0, //"False"
     };
 
-    rowsAffectedOrErrorCode = await db.insert("users", userTableInsert);
-    if(rowsAffectedOrErrorCode!=1) {
-      throw CustomDatabaseException("Something went wrong with inserting into users, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
-    }
-
+    indexInsertedAt = await db.insert("users", userTableInsert);
   }
 
   @override
@@ -139,10 +146,7 @@ class SQLiteHandler extends DBHandler {
       "localAlias" : localAlias,
       "isBlocked" : isNowBlocked,
     };
-    int rowsAffectedOrErrorCode = await db.update("users", rowToBeInserted, where: "localUserID = ?", whereArgs: [localUserID]);
-    if(rowsAffectedOrErrorCode!=1) {
-      throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
-    }
+    int indexInsertedAt = await db.update("users", rowToBeInserted, where: "localUserID = ?", whereArgs: [localUserID]);
   }
 
   @override
@@ -157,10 +161,7 @@ class SQLiteHandler extends DBHandler {
     };
 
 
-    int rowsAffectedOrErrorCode = await db.update("users", rowToBeInserted, where: "localUserID = ?", whereArgs: [localUserID]);
-    if(rowsAffectedOrErrorCode!=1) {
-      throw CustomDatabaseException("Something went wrong with inserting, not sure what. Returncode of insert was '$rowsAffectedOrErrorCode'.");
-    }
+    int indexInsertedAt = await db.update("users", rowToBeInserted, where: "localUserID = ?", whereArgs: [localUserID]);
   }
 
   @override
@@ -204,9 +205,8 @@ class SQLiteHandler extends DBHandler {
   @override
   Future<List<Message>> fetchMessages(int localUserID, int amountOfMessages) async {
     Database db = await openDB();
-
     //Get the top {amountOfMessages} from both outgoing and incoming based on unixtime
-    List<Map<String, dynamic>> messages = await db.query("messages", orderBy: "unixTime desc", limit: amountOfMessages);
+    List<Map<String, dynamic>> messages = await db.query("messages", where: "localUserID = ?", whereArgs: [localUserID], orderBy: "unixTime desc", limit: amountOfMessages);
 
     //Convert into a combined List<Message>
     List<Message> result = [];
@@ -224,6 +224,8 @@ class SQLiteHandler extends DBHandler {
   Future<void> deleteDB({String databaseName}) async {
     await deleteDatabase('local_database.db');
   }
+
+
 
 
 }

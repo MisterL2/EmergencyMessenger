@@ -13,7 +13,7 @@ class ResetPage extends StatefulWidget {
 
 class ResetPageState extends PrivateState<ResetPage> {
   @override
-  Widget buildImpl(BuildContext context, String password) {
+  Widget buildImpl(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -22,6 +22,11 @@ class ResetPageState extends PrivateState<ResetPage> {
         child: Text("Reset your usercode"),
       ),
     );
+  }
+
+  @override
+  bool preValidate(BuildContext context) {
+    return true;
   }
 
 }
