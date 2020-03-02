@@ -67,8 +67,10 @@ class RegisterPageState extends UnregisteredState<RegisterPage> {
 
     //TODO - Receive user_id ? and device_id is kinda unnecessary for registration, it is always 1
 
-    //TODO - Set up local storage to save this data
+    //TODO - Save this information somewhere (securely)
 
+    //Create DB
+    DBHandler.getDBHandler().openDB();
 
 
 

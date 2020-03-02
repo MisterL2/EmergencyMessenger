@@ -35,12 +35,13 @@ class SQLiteHandler extends DBHandler {
           );
           db.execute(
             "CREATE TABLE messages ("
-            "localUserID PRIMARY KEY," //Of the conversation partner
+            "localUserID NOT NULL," //Of the conversation partner
             "content TEXT NOT NULL,"
             "unixTime INTEGER NOT NULL CHECK(unixTime > 1577979238),"
             "hasBeenRead INTEGER DEFAULT 0 CHECK(hasBeenRead=0 or hasBeenRead=1),"
             "isOwnMessage INTEGER DEFAULT 0 CHECK(isOwnMessage=0 or isOwnMessage=1),"
-            "FOREIGN KEY (localUserID) REFERENCES userCodes(localUserID)"
+            "FOREIGN KEY (localUserID) REFERENCES userCodes(localUserID),"
+            "PRIMARY KEY (localUserID, unixTime)"
             ");"
           );
           //SHARED_PREFERENCES library cannot guarantee data persists (LOL) so using an SQLite table to cache the local userID

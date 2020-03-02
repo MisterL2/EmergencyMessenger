@@ -1,3 +1,4 @@
+import 'package:emergency_messenger_client/utilities/SoundManager.dart';
 import 'package:flutter/material.dart';
 
 
@@ -13,6 +14,8 @@ class FrontPage extends StatefulWidget {
 class FrontPageState extends State<FrontPage> {
   @override
   Widget build(BuildContext context) {
+    SoundManager.initialise(); //Runs async, pre-loads sounds for better performance
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

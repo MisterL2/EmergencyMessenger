@@ -29,6 +29,7 @@ class ConversationPageState extends DynamicPrivateState<ConversationPage> {
     _scrollController.addListener(() async {
       double distanceToMaxScroll = _scrollController.position.maxScrollExtent - _scrollController.offset;
       if(distanceToMaxScroll < 10) {
+        print("Fetching additional messages!");
         int messagesToGet = _messages.length + 10; //Fetches 10 additional messages (fetches all messages from local DB every time to ensure consistency (and also its easier to do in SQL))
         _messages = await fetchNewestMessages(messagesToGet);
         if(_messages.length<messagesToGet) { //If all messages are loaded
@@ -40,7 +41,7 @@ class ConversationPageState extends DynamicPrivateState<ConversationPage> {
   }
   
   @override
-  Widget buildImpl(BuildContext context) {
+  Widget buildImpl(BuildContext context) { //TODO - Change the design, make it scrolled to the bottom by default and show multiline messages properly (no listview!)
     return Scaffold(
       appBar: AppBar(
         title: Row(

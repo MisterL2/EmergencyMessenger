@@ -1,7 +1,12 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
+import 'package:emergency_messenger_client/dataclasses/User.dart';
+import 'package:emergency_messenger_client/dataclasses/UserCode.dart';
+import 'package:emergency_messenger_client/local_database/DBHandler.dart';
 import 'package:emergency_messenger_client/pages/private/PrivateState.dart';
 import 'package:emergency_messenger_client/utilities/SecureRandomiser.dart';
+import 'package:emergency_messenger_client/utilities/SoundManager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -101,7 +106,9 @@ class AddUserPageState extends PrivateState<AddUserPage> {
 
       print("Attempting to add user!");
 
-      //TODO - Connect to server and retrieve values for that code
+      //TODO - Connect to server and retrieve userCode for that connectionCode
+      //This is a TEMPORARY placeholder usercode
+      UserCode retrievedUserCode = UserCode("1111567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
 
       bool unableToConnect = false;
 
@@ -117,12 +124,14 @@ class AddUserPageState extends PrivateState<AddUserPage> {
 
       if(serverConfirmsCodeIsCorrect) {
 
+        DBHandler.getDBHandler().addUser(retrievedUserCode); //TODO - What happens if this database call fails?
+
         Scaffold.of(context).showSnackBar(
             SnackBar(
               content: Text("User has been successfully added!"),
               behavior: SnackBarBehavior.floating,
               elevation: 2,
-              onVisible: () => print("TODO - Play a success-sound when snackbar shows!"), //TODO - Play sound when SnackBar shows ("Success" or "Ding")
+              onVisible: () => SoundManager.player.play("pling.wav", mode: PlayerMode.LOW_LATENCY), //TODO - Make this work
         ));
 
         setState(() {
