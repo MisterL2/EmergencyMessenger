@@ -20,6 +20,7 @@ class ConversationPageState extends DynamicPrivateState<ConversationPage> {
   TextEditingController _controller = TextEditingController();
   ScrollController _scrollController = ScrollController();
   List<Message> _messages = [];
+  bool _allMessagesLoaded = false;
   UnixTimeStringGenerator _unixTimeStringGenerator = UnixTimeStringGenerator();
 
   @override
@@ -29,8 +30,10 @@ class ConversationPageState extends DynamicPrivateState<ConversationPage> {
       double distanceToMaxScroll = _scrollController.position.maxScrollExtent - _scrollController.offset;
       if(distanceToMaxScroll < 10) {
         int messagesToGet = _messages.length + 10; //Fetches 10 additional messages (fetches all messages from local DB every time to ensure consistency (and also its easier to do in SQL))
-        //TODO - Determine when the top is reached and there are no further messages to load!
         _messages = await fetchNewestMessages(messagesToGet);
+        if(_messages.length<messagesToGet) { //If all messages are loaded
+          _allMessagesLoaded = true;
+        }
         setState(() {}); //Update UI to reflect this change
       }
     });
@@ -66,11 +69,11 @@ class ConversationPageState extends DynamicPrivateState<ConversationPage> {
             controller: _scrollController,
             itemExtent: 40,
             reverse: true,
-            itemCount: _messages.length + 1, //1 Tile for the loading icon
+            itemCount: _messages.length + (_allMessagesLoaded ? 0 : 1), //1 Tile for the loading icon, unless all messages are loaded
             itemBuilder: (context, index) {
 
-              //Last item = Top of list
-              if (index == _messages.length) return Align(child: CircularProgressIndicator());
+              //Last item = Top of list. Only display loading icon if not all messages are already loaded.
+              if (!_allMessagesLoaded && index == _messages.length) return Align(child: CircularProgressIndicator());
 
               //Otherwise, print message
               return _buildMessage(_messages[index]);
@@ -215,6 +218,10 @@ class ConversationPageState extends DynamicPrivateState<ConversationPage> {
 
     //TODO - HTTPS transaction to send out message
     //TODO - Save send-out message in local storage. Mark whether transmission succeeded or not! (If not, keep resending)
+
+    //ONLY add message to local storage if it was sent out correctly!
+    print("Adding sent-out message to local storage!");
+    DBHandler.getDBHandler().addMessage(_conversationPartnerID, message, currentUnixTime, false);
   }
 
   Widget _buildMessage(Message message) {

@@ -1,6 +1,7 @@
 import 'package:emergency_messenger_client/dataclasses/ConversationHeader.dart';
 import 'package:emergency_messenger_client/dataclasses/Message.dart';
 import 'package:emergency_messenger_client/dataclasses/User.dart';
+import 'package:emergency_messenger_client/dataclasses/UserCode.dart';
 import 'package:emergency_messenger_client/local_database/CustomDatabaseException.dart';
 import 'package:emergency_messenger_client/local_database/DBHandler.dart';
 import 'package:path/path.dart';
@@ -83,9 +84,9 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
-  Future<int> getLocalUserIDOf(String userCode) async {
+  Future<int> getLocalUserIDOf(UserCode userCode) async {
     Database db = await openDB();
-    List<Map<String, dynamic>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode]);
+    List<Map<String, dynamic>> result = await db.query("userCodes", where: "userCode = ?", whereArgs: [userCode.userCode]);
 
     if(result.length==0) {
       throw CustomDatabaseException("There is no localUserID entry for this userCode!");
@@ -101,8 +102,7 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
-  Future<void> addMessage(String otherUserCode, String content, int unixTime, bool incoming) async {
-    int localUserID = await getLocalUserIDOf(otherUserCode);
+  Future<void> addMessage(int localUserID, String content, int unixTime, bool incoming) async {
     Map<String, dynamic> message = {
       "localUserID" : localUserID,
       "content" : content,
@@ -117,13 +117,13 @@ class SQLiteHandler extends DBHandler {
   }
 
   @override
-  Future<void> addUser(String userCode) async {
+  Future<void> addUser(UserCode userCode) async {
     Database db = await openDB();
     int rowCount = Sqflite.firstIntValue(await db.rawQuery("SELECT count(*) FROM userCodes;"));
     int localUserID = rowCount + 1;
     Map<String, dynamic> userCodesInsert = {
       "localUserID" : localUserID,
-      "userCode" : userCode,
+      "userCode" : userCode.userCode,
     };
     int indexInsertedAt = await db.insert("userCodes", userCodesInsert);
 
